@@ -51,11 +51,15 @@ export const processes = pgTable("processes", {
   productId: integer("product_id").references(() => products.id).notNull(),
   transportId: integer("transport_id").references(() => transports.id),
   deliveryId: integer("delivery_id").references(() => deliveries.id),
-  currentEvent: integer("current_event").notNull().default(1), // 1-4
+  currentEvent: integer("current_event").notNull().default(1), // 1-4 (salida) or 1-3 (entrada)
   status: text("status", { 
-    enum: ["draft", "in_progress", "paused", "completed"] 
+    enum: ["draft", "in_progress", "paused", "completed", "complaint"] 
   }).notNull().default("draft"),
   processType: text("process_type", { enum: ["entrada", "salida"] }).notNull(),
+  // Campos específicos para evento 3 de entrada
+  event3Status: text("event3_status", { enum: ["confirmed", "complaint"] }),
+  complaintNotes: text("complaint_notes"),
+  confirmedAt: timestamp("confirmed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
