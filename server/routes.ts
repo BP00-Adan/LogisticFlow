@@ -120,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update process
       const updatedProcess = await storage.updateProcess(processId, {
         deliveryId: delivery.id,
-        currentEvent: 3,
+        currentEvent: 4,
       });
 
       if (!updatedProcess) {

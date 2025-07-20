@@ -115,23 +115,23 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white card-shadow sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-blue-200 transition-all">
-                <Upload className="h-6 w-6 text-blue-600" />
+      {/* Header - Mobile Optimized */}
+      <header className="bg-white shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Upload className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">LogiFlow</h1>
-                <p className="text-sm text-gray-500">Sistema de Gestión Logística</p>
+                <h1 className="text-lg font-bold text-gray-900">LogiFlow</h1>
+                <p className="text-xs text-gray-500 hidden sm:block">Sistema de Gestión Logística</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button className="btn-logistics-primary">
+            <div className="flex items-center space-x-2">
+              <Button size="sm" className="hidden sm:flex bg-blue-600 hover:bg-blue-700">
                 <FileText className="h-4 w-4" />
-                Reportes
+                <span className="hidden md:inline ml-2">Reportes</span>
               </Button>
               <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
                 <Settings className="h-4 w-4" />
@@ -141,119 +141,119 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="card-shadow">
-            <CardContent className="p-6">
+      <div className="max-w-7xl mx-auto px-4 py-4 space-y-6">
+        {/* Quick Stats - Mobile Optimized */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="shadow-sm">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Productos Registrados</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xs font-medium text-gray-500">Productos</p>
+                  <p className="text-xl font-bold text-gray-900">
                     {statsLoading ? "..." : stats?.totalProducts || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Package className="h-6 w-6 text-blue-600" />
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Package className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-shadow">
-            <CardContent className="p-6">
+          <Card className="shadow-sm">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">En Transporte</p>
-                  <p className="text-2xl font-bold text-yellow-600">
+                  <p className="text-xs font-medium text-gray-500">En Tránsito</p>
+                  <p className="text-xl font-bold text-yellow-600">
                     {statsLoading ? "..." : stats?.inTransit || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Truck className="h-6 w-6 text-yellow-600" />
+                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <Truck className="h-5 w-5 text-yellow-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-shadow">
-            <CardContent className="p-6">
+          <Card className="shadow-sm">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Entregados</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-xs font-medium text-gray-500">Completados</p>
+                  <p className="text-xl font-bold text-green-600">
                     {statsLoading ? "..." : stats?.delivered || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="card-shadow">
-            <CardContent className="p-6">
+          <Card className="shadow-sm">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Procesos Activos</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-xs font-medium text-gray-500">Activos</p>
+                  <p className="text-xl font-bold text-blue-600">
                     {statsLoading ? "..." : stats?.activeProcesses || 0}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Settings className="h-6 w-6 text-blue-600" />
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Settings className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Process Flow Navigator */}
-        <Card className="card-shadow mb-8">
-          <CardHeader>
-            <CardTitle>Iniciar Nuevo Proceso</CardTitle>
+        {/* Process Flow Navigator - Mobile Optimized */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg">Iniciar Nuevo Proceso</CardTitle>
           </CardHeader>
-          <CardContent className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <CardContent className="p-4 pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div 
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer"
+                className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer active:scale-95"
                 onClick={() => handleStartFlow("entrada")}
               >
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ArrowDown className="h-8 w-8 text-green-600" />
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <ArrowDown className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Entrada a Bodega</h3>
-                <p className="text-gray-500">Registrar productos que ingresan al almacén</p>
-                <p className="text-sm text-gray-400 mt-2">Eventos: 1 → 2 → 3</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Entrada</h3>
+                <p className="text-sm text-gray-500 mb-2">Productos que ingresan</p>
+                <p className="text-xs text-gray-400">3 eventos</p>
               </div>
 
               <div 
-                className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer"
+                className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-yellow-500 hover:bg-yellow-50 transition-all cursor-pointer active:scale-95"
                 onClick={() => handleStartFlow("salida")}
               >
-                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <ArrowUp className="h-8 w-8 text-yellow-600" />
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <ArrowUp className="h-6 w-6 text-yellow-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Salida de Bodega</h3>
-                <p className="text-gray-500">Gestionar envío y entrega de productos</p>
-                <p className="text-sm text-gray-400 mt-2">Eventos: 1 → 2 → 3 → 4</p>
+                <h3 className="text-base font-semibold text-gray-900 mb-1">Salida</h3>
+                <p className="text-sm text-gray-500 mb-2">Envío y entrega</p>
+                <p className="text-xs text-gray-400">4 eventos</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Active Processes */}
-        <Card className="card-shadow mb-8">
-          <CardHeader>
+        {/* Active Processes - Mobile Optimized */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4">
             <div className="flex justify-between items-center">
-              <CardTitle>Procesos Activos</CardTitle>
-              <Button variant="ghost" className="text-blue-600 hover:text-blue-700">
+              <CardTitle className="text-lg">Procesos Activos</CardTitle>
+              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm">
                 Ver todos
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-4 pt-0">
             {processesLoading ? (
               <div className="text-center py-8">Cargando procesos activos...</div>
             ) : !activeProcesses?.length ? (
@@ -261,50 +261,49 @@ export default function Dashboard() {
                 No hay procesos activos en este momento
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {activeProcesses.map((process) => (
-                  <div key={process.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-all">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-[--logistics-warning-light] rounded-lg flex items-center justify-center">
-                          <Package className="h-6 w-6 text-[--logistics-warning]" />
+                  <div key={process.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-all">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Package className="h-5 w-5 text-yellow-600" />
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{process.product.name}</p>
-                          <p className="text-sm text-gray-500">Proceso #{process.id}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-gray-900 truncate">{process.product.name}</p>
+                          <p className="text-xs text-gray-500">#{process.id}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-center">
-                          <p className="text-xs text-gray-500">Evento Actual</p>
-                          <p className="text-sm font-medium text-yellow-600">
-                            {getEventName(process.currentEvent, process.processType)}
-                          </p>
-                        </div>
-                        <Button 
-                          className="btn-logistics-outline"
-                          onClick={() => handleResumeProcess(process)}
-                          disabled={resumeProcessMutation.isPending}
-                        >
-                          {process.status === "paused" ? (
-                            <>
-                              <Play className="h-4 w-4" />
-                              Reanudar
-                            </>
-                          ) : (
-                            "Continuar"
-                          )}
-                        </Button>
-                      </div>
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleResumeProcess(process)}
+                        disabled={resumeProcessMutation.isPending}
+                        className="flex-shrink-0"
+                      >
+                        {process.status === "paused" ? (
+                          <Play className="h-3 w-3" />
+                        ) : (
+                          "Ver"
+                        )}
+                      </Button>
                     </div>
-                    <div className="mt-4">
-                      <div className="flex items-center space-x-2 text-xs text-gray-500">
-                        <Badge className={getStatusColor(process.status)}>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2">
+                        <Badge className={process.processType === "entrada" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}>
                           {process.processType === "entrada" ? "Entrada" : "Salida"}
                         </Badge>
-                        <span>•</span>
-                        <span>Iniciado: {formatDate(process.createdAt)}</span>
+                        <span className="text-gray-500">
+                          {getEventName(process.currentEvent, process.processType)}
+                        </span>
                       </div>
+                      <Badge className={getStatusColor(process.status)}>
+                        {process.status === "completed" ? "OK" : 
+                         process.status === "complaint" ? "Queja" :
+                         process.status === "in_progress" ? "Activo" :
+                         process.status === "paused" ? "Pausado" : "Draft"}
+                      </Badge>
                     </div>
                   </div>
                 ))}
@@ -313,72 +312,60 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Recent Records */}
-        <Card className="card-shadow">
-          <CardHeader>
+        {/* Recent Records - Mobile Optimized */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4">
             <div className="flex justify-between items-center">
-              <CardTitle>Registros Recientes</CardTitle>
-              <Button variant="ghost" className="text-[--logistics-primary] hover:text-[--logistics-primary]/80">
-                Ver todos
+              <CardTitle className="text-lg">Historial</CardTitle>
+              <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-sm">
+                Ver más
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-4 pt-0">
             {allProcessesLoading ? (
-              <div className="text-center py-8">Cargando registros...</div>
+              <div className="text-center py-8 text-gray-500">Cargando...</div>
             ) : !allProcesses?.length ? (
               <div className="text-center py-8 text-gray-500">
                 No hay registros disponibles
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-medium text-gray-500 text-sm">Producto</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500 text-sm">Tipo</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500 text-sm">Estado</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500 text-sm">Fecha</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-500 text-sm">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {allProcesses.slice(0, 5).map((process) => (
-                      <tr key={process.id} className="hover:bg-gray-50">
-                        <td className="py-3 px-4">{process.product.name}</td>
-                        <td className="py-3 px-4">
-                          <Badge className={process.processType === "entrada" 
-                            ? "bg-[--logistics-secondary-light] text-[--logistics-secondary]"
-                            : "bg-[--logistics-warning-light] text-[--logistics-warning]"
-                          }>
-                            {process.processType === "entrada" ? "Entrada" : "Salida"}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge className={getStatusColor(process.status)}>
-                            {process.status === "completed" ? "Completado" : 
-                             process.status === "complaint" ? "Con Queja" :
-                             process.status === "in_progress" ? "En Progreso" :
-                             process.status === "paused" ? "Pausado" : "Borrador"}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-gray-500 text-sm">
-                          {formatDate(process.createdAt)}
-                        </td>
-                        <td className="py-3 px-4">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-[--logistics-primary] hover:text-[--logistics-primary]/80"
-                          >
-                            <Eye className="h-4 w-4" />
-                            Ver
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-3">
+                {allProcesses.slice(0, 3).map((process) => (
+                  <div key={process.id} className="border border-gray-200 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900 truncate flex-1 mr-2">
+                        {process.product.name}
+                      </h4>
+                      <Button variant="ghost" size="sm" className="flex-shrink-0 p-1 h-auto">
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2">
+                        <Badge className={process.processType === "entrada" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"} size="sm">
+                          {process.processType === "entrada" ? "Entrada" : "Salida"}
+                        </Badge>
+                        <span className="text-gray-500">#{process.id}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge className={getStatusColor(process.status)} size="sm">
+                          {process.status === "completed" ? "OK" : 
+                           process.status === "complaint" ? "Queja" :
+                           process.status === "in_progress" ? "Activo" :
+                           process.status === "paused" ? "Pausado" : "Draft"}
+                        </Badge>
+                        <span className="text-gray-400">
+                          {new Date(process.createdAt).toLocaleDateString("es-ES", { 
+                            day: "2-digit", 
+                            month: "2-digit" 
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>

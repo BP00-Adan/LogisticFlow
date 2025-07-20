@@ -21,7 +21,7 @@ const deliverySchema = z.object({
   originPlace: z.string().min(1, "El lugar de salida es requerido"),
   destinationPlace: z.string().min(1, "El lugar de destino es requerido"),
   departureTime: z.string().min(1, "La fecha y hora de salida es requerida"),
-  travelTime: z.number().min(1, "El tiempo de traslado debe ser mayor a 0"),
+  travelTime: z.coerce.number().min(1, "El tiempo de traslado debe ser mayor a 0"),
   deliveryNotes: z.string().optional(),
 });
 
@@ -46,8 +46,13 @@ export default function Event3() {
   });
 
   const updateProcessMutation = useMutation({
-    mutationFn: (data: DeliveryFormData) => 
-      apiRequest("POST", `/api/processes/${processId}/delivery`, data),
+    mutationFn: (data: DeliveryFormData) => {
+      const processedData = {
+        ...data,
+        departureTime: new Date(data.departureTime).toISOString(),
+      };
+      return apiRequest("POST", `/api/processes/${processId}/delivery`, processedData);
+    },
     onSuccess: () => {
       toast({
         title: "Entrega registrada",
