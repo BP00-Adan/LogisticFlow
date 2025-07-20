@@ -57,13 +57,9 @@ export default function Event2() {
         description: "La información del transporte ha sido registrada exitosamente.",
       });
       
-      // If it's an entrada flow, process is complete after Event 2
+      // Navigate to appropriate event 3 based on flow type
       if (updatedProcess.processType === "entrada") {
-        setLocation("/");
-        toast({
-          title: "Proceso completado",
-          description: "El proceso de entrada ha sido completado exitosamente.",
-        });
+        setLocation(`/event3-entrada?processId=${processId}`);
       } else {
         setLocation(`/event3/${processId}`);
       }

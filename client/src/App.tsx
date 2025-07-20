@@ -7,6 +7,7 @@ import Dashboard from "@/pages/dashboard";
 import Event1 from "@/pages/event1";
 import Event2 from "@/pages/event2";
 import Event3 from "@/pages/event3";
+import Event3Entrada from "@/pages/event3-entrada";
 import Event4 from "@/pages/event4";
 import NotFound from "@/pages/not-found";
 
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/event1/:flowType" component={Event1} />
       <Route path="/event2/:processId" component={Event2} />
       <Route path="/event3/:processId" component={Event3} />
+      <Route path="/event3-entrada" component={Event3Entrada} />
       <Route path="/event4/:processId" component={Event4} />
       <Route component={NotFound} />
     </Switch>

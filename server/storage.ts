@@ -140,6 +140,9 @@ export class MemStorage implements IStorage {
       currentEvent: insertProcess.currentEvent || 1,
       status: insertProcess.status || "draft",
       processType: insertProcess.processType,
+      event3Status: insertProcess.event3Status || null,
+      complaintNotes: insertProcess.complaintNotes || null,
+      confirmedAt: insertProcess.confirmedAt || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

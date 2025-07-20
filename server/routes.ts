@@ -87,22 +87,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create transport
       const transport = await storage.createTransport(transportData);
       
-      // Update process
+      // Update process to next event
+      const nextEvent = 3; // Both entrada and salida go to event 3
       const updatedProcess = await storage.updateProcess(processId, {
         transportId: transport.id,
-        currentEvent: 2,
+        currentEvent: nextEvent,
       });
 
       if (!updatedProcess) {
         return res.status(404).json({ error: "Process not found" });
-      }
-
-      // For entrada flow, mark as completed after Event 2
-      if (updatedProcess.processType === "entrada") {
-        await storage.updateProcess(processId, {
-          status: "completed",
-          currentEvent: 2,
-        });
       }
 
       const processWithDetails = await storage.getProcessWithDetails(processId);
@@ -261,6 +254,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to generate invoice" });
+    }
+  });
+
+  // Complete Event 3 for entrada process (confirmation or complaint)
+  app.post("/api/processes/:id/complete-event3-entrada", async (req, res) => {
+    try {
+      const processId = parseInt(req.params.id);
+      const { action, notes } = req.body;
+      
+      if (!["confirmed", "complaint"].includes(action)) {
+        return res.status(400).json({ error: "Invalid action. Must be 'confirmed' or 'complaint'" });
+      }
+
+      const updateData: any = {
+        event3Status: action,
+        updatedAt: new Date(),
+      };
+
+      if (action === "confirmed") {
+        updateData.status = "completed";
+        updateData.confirmedAt = new Date();
+      } else if (action === "complaint") {
+        updateData.status = "complaint";
+        updateData.complaintNotes = notes || "";
+      }
+
+      const updatedProcess = await storage.updateProcess(processId, updateData);
+
+      if (!updatedProcess) {
+        return res.status(404).json({ error: "Process not found" });
+      }
+
+      const processWithDetails = await storage.getProcessWithDetails(processId);
+      res.json(processWithDetails);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to complete event 3" });
     }
   });
 

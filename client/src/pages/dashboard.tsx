@@ -58,7 +58,12 @@ export default function Dashboard() {
     } else if (nextEvent === 2) {
       setLocation(`/event2/${process.id}`);
     } else if (nextEvent === 3) {
-      setLocation(`/event3/${process.id}`);
+      // Direct to appropriate event 3 based on flow type
+      if (process.processType === "entrada") {
+        setLocation(`/event3-entrada?processId=${process.id}`);
+      } else {
+        setLocation(`/event3/${process.id}`);
+      }
     } else if (nextEvent === 4) {
       setLocation(`/event4/${process.id}`);
     }
@@ -78,6 +83,8 @@ export default function Dashboard() {
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-600";
+      case "complaint":
+        return "bg-red-100 text-red-600";
       case "in_progress":
         return "bg-yellow-100 text-yellow-600";
       case "paused":
@@ -87,14 +94,23 @@ export default function Dashboard() {
     }
   };
 
-  const getEventName = (event: number) => {
-    const events = {
-      1: "Registro",
-      2: "Transporte", 
-      3: "Entrega",
-      4: "Reportes"
-    };
-    return events[event as keyof typeof events] || "Desconocido";
+  const getEventName = (event: number, processType?: string) => {
+    if (processType === "entrada") {
+      const events = {
+        1: "Registro",
+        2: "Transporte", 
+        3: "Confirmación"
+      };
+      return events[event as keyof typeof events] || "Desconocido";
+    } else {
+      const events = {
+        1: "Registro",
+        2: "Transporte", 
+        3: "Entrega",
+        4: "Reportes"
+      };
+      return events[event as keyof typeof events] || "Desconocido";
+    }
   };
 
   return (
@@ -209,7 +225,7 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Entrada a Bodega</h3>
                 <p className="text-gray-500">Registrar productos que ingresan al almacén</p>
-                <p className="text-sm text-gray-400 mt-2">Eventos: 1 → 2</p>
+                <p className="text-sm text-gray-400 mt-2">Eventos: 1 → 2 → 3</p>
               </div>
 
               <div 
@@ -261,8 +277,8 @@ export default function Dashboard() {
                       <div className="flex items-center space-x-4">
                         <div className="text-center">
                           <p className="text-xs text-gray-500">Evento Actual</p>
-                          <p className="text-sm font-medium text-[--logistics-warning]">
-                            {getEventName(process.currentEvent)}
+                          <p className="text-sm font-medium text-yellow-600">
+                            {getEventName(process.currentEvent, process.processType)}
                           </p>
                         </div>
                         <Button 
@@ -341,6 +357,7 @@ export default function Dashboard() {
                         <td className="py-3 px-4">
                           <Badge className={getStatusColor(process.status)}>
                             {process.status === "completed" ? "Completado" : 
+                             process.status === "complaint" ? "Con Queja" :
                              process.status === "in_progress" ? "En Progreso" :
                              process.status === "paused" ? "Pausado" : "Borrador"}
                           </Badge>
