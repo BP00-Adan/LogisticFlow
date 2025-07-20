@@ -344,13 +344,13 @@ export default function Dashboard() {
                     
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center space-x-2">
-                        <Badge className={process.processType === "entrada" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"} size="sm">
+                        <Badge className={process.processType === "entrada" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}>
                           {process.processType === "entrada" ? "Entrada" : "Salida"}
                         </Badge>
                         <span className="text-gray-500">#{process.id}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(process.status)} size="sm">
+                        <Badge className={getStatusColor(process.status)}>
                           {process.status === "completed" ? "OK" : 
                            process.status === "complaint" ? "Queja" :
                            process.status === "in_progress" ? "Activo" :

@@ -7,6 +7,7 @@ This is a web application for managing logistics operations based on sequential 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Storage preference: In-memory storage is sufficient for current needs.
 
 ## System Architecture
 
