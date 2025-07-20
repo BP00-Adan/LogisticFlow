@@ -1,0 +1,94 @@
+Crea una aplicación web para gestionar operaciones logísticas basada en eventos secuenciales. El flujo del sistema debe permitir el registro, seguimiento y reporte de productos que entran o salen de una bodega, con navegación clara entre cada evento.
+
+🎯 Objetivo principal (versión beta):
+Desarrollar una versión funcional básica (beta) que permita simular el flujo completo desde el registro de productos hasta la entrega y generación de reportes. La información puede almacenarse en memoria o en un archivo JSON local.
+
+📦 Eventos y funcionalidades clave:
+📌 Evento 1: Registro de productos
+Agregar productos uno a uno o múltiples.
+
+Datos requeridos:
+
+Nombre del producto
+
+Dimensiones
+
+Peso
+
+Regulaciones (checkboxes: frágil, litio, etc.)
+
+Tipo de flujo: Entrada o Salida
+
+En caso de entrada, el proceso solo incluye Evento 1 y Evento 2.
+
+📌 Evento 2: Información de transporte
+Se activa después de registrar productos.
+
+Campos requeridos:
+
+Nombre del transportista
+
+Vehículo / tipo
+
+Placa del vehículo
+
+Número de licencia
+
+Imagen del conductor
+
+Notas opcionales
+
+Se debe poder pausar y reanudar este evento desde el dashboard si el usuario sale.
+
+📌 Evento 3: Entrega del producto
+Estado por defecto: "En transporte"
+
+Botón para marcar como "Entregado", y registrar:
+
+Fecha y hora de salida
+
+Lugar de salida
+
+Lugar de destino
+
+Tiempo de traslado
+
+Notas adicionales
+
+📌 Evento 4: Reportes y cierre
+Generación de:
+
+Reporte de salida o entrada de bodega
+
+Reporte de transporte
+
+Factura (simulada) para cliente receptor
+
+Todo queda almacenado en registros accesibles desde el dashboard.
+
+🧭 Características adicionales requeridas:
+✓ Navegación visual entre los 4 eventos secuenciales.
+
+✓ Vista especial para procesos de entrada (solo evento 1 y 2).
+
+✓ Botones para descargar reportes PDF en cualquier momento.
+
+✓ Avance automático al siguiente evento al completar los formularios.
+
+✓ Capacidad para reingresar a cualquier evento desde el dashboard si está en pausa.
+
+✓ Los reportes deben incluir información de producto, transporte y entrega.
+
+✓ La app debe usar un logo cargado por el usuario.
+
+✓ Interfaz simple: formularios para ingresar datos, listas o tablas para ver registros.
+
+✅ Requisitos técnicos para esta beta:
+Almacenamiento temporal en memoria o archivo JSON.
+
+Reportes PDF simulados (pueden ser placeholders funcionales).
+
+Frontend con diseño claro, intuitivo y visual.
+
+
+Muestra ejemplos funcionales (registro, navegación, descarga de reportes).
