@@ -38,16 +38,105 @@ export default function Event4() {
   });
 
   const generateReportMutation = useMutation({
-    mutationFn: (reportType: string) => 
-      apiRequest("GET", `/api/processes/${processId}/reports/${reportType}`),
-    onSuccess: async (response, reportType) => {
-      const reportData = await response.json();
-      // In a real implementation, this would trigger a PDF download
+    mutationFn: async (reportType: string) => {
+      const response = await fetch(`/api/processes/${processId}/reports/${reportType}`);
+      if (!response.ok) throw new Error('Failed to generate report');
+      return response.json();
+    },
+    onSuccess: async (reportData, reportType) => {
+      // Dynamically import jsPDF to avoid SSR issues
+      const { jsPDF } = await import('jspdf');
+      
+      // Create new PDF document
+      const doc = new jsPDF();
+      
+      // Add header
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(reportData.title, 20, 30);
+      
+      // Add basic info
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Proceso #${reportData.processId}`, 20, 45);
+      doc.text(`Tipo: ${reportData.processType}`, 20, 55);
+      doc.text(`Fecha: ${reportData.date}`, 20, 65);
+      
+      let yPos = 85;
+      
+      // Add product information
+      doc.setFont("helvetica", "bold");
+      doc.text("PRODUCTO:", 20, yPos);
+      yPos += 10;
+      doc.setFont("helvetica", "normal");
+      doc.text(`Nombre: ${reportData.product.name}`, 25, yPos);
+      yPos += 8;
+      doc.text(`Peso: ${reportData.product.weight}`, 25, yPos);
+      yPos += 8;
+      doc.text(`Dimensiones: ${reportData.product.dimensions}`, 25, yPos);
+      yPos += 15;
+      
+      // Add transport info if available
+      if (reportData.transport && !reportData.transport.error) {
+        doc.setFont("helvetica", "bold");
+        doc.text("TRANSPORTE:", 20, yPos);
+        yPos += 10;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Conductor: ${reportData.transport.driver}`, 25, yPos);
+        yPos += 8;
+        doc.text(`Licencia: ${reportData.transport.license}`, 25, yPos);
+        yPos += 8;
+        doc.text(`Vehículo: ${reportData.transport.vehicle}`, 25, yPos);
+        yPos += 15;
+      }
+      
+      // Add delivery info if available
+      if (reportData.delivery && !reportData.delivery.error) {
+        doc.setFont("helvetica", "bold");
+        doc.text("ENTREGA:", 20, yPos);
+        yPos += 10;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Origen: ${reportData.delivery.origin}`, 25, yPos);
+        yPos += 8;
+        doc.text(`Destino: ${reportData.delivery.destination}`, 25, yPos);
+        yPos += 8;
+        doc.text(`Salida: ${reportData.delivery.departureTime}`, 25, yPos);
+        yPos += 15;
+      }
+      
+      // Add invoice details if it's an invoice report
+      if (reportData.services) {
+        doc.setFont("helvetica", "bold");
+        doc.text("SERVICIOS:", 20, yPos);
+        yPos += 10;
+        doc.setFont("helvetica", "normal");
+        
+        reportData.services.forEach((service: any) => {
+          doc.text(`${service.description}: $${service.total.toLocaleString()}`, 25, yPos);
+          yPos += 8;
+        });
+        
+        yPos += 10;
+        doc.setFont("helvetica", "bold");
+        doc.text(`SUBTOTAL: $${reportData.totals.subtotal.toLocaleString()}`, 25, yPos);
+        yPos += 8;
+        doc.text(`IVA (19%): $${reportData.totals.iva.toLocaleString()}`, 25, yPos);
+        yPos += 8;
+        doc.text(`TOTAL: $${reportData.totals.total.toLocaleString()}`, 25, yPos);
+      }
+      
+      // Add footer
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "italic");
+      doc.text(`Generado el ${new Date().toLocaleString("es-ES")}`, 20, 280);
+      
+      // Save the PDF
+      doc.save(`${reportType}-proceso-${processId}.pdf`);
+      
       toast({
-        title: "Reporte generado",
-        description: `El reporte de ${reportType} ha sido generado exitosamente.`,
+        title: "Reporte descargado",
+        description: `El reporte de ${reportType} se ha descargado exitosamente.`,
       });
-      console.log("Report data:", reportData);
     },
     onError: () => {
       toast({
@@ -163,7 +252,7 @@ export default function Event4() {
                 <div className="space-y-2 text-sm">
                   <div><span className="text-gray-500">Origen:</span> <span>{process.delivery?.originPlace || "N/A"}</span></div>
                   <div><span className="text-gray-500">Destino:</span> <span>{process.delivery?.destinationPlace || "N/A"}</span></div>
-                  <div><span className="text-gray-500">Tiempo Traslado:</span> <span>{process.delivery?.travelTime || 0} minutos</span></div>
+                  <div><span className="text-gray-500">Salida:</span> <span>{process.delivery?.departureTime ? formatDate(process.delivery.departureTime) : "N/A"}</span></div>
                   <div><span className="text-gray-500">Completado:</span> <span>{formatDate(new Date())}</span></div>
                 </div>
               </div>

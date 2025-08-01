@@ -34,7 +34,6 @@ export interface DeliveryFormData {
   originPlace: string;
   destinationPlace: string;
   departureTime: string;
-  travelTime: number;
   deliveryNotes?: string;
 }
 

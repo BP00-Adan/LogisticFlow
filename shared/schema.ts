@@ -41,7 +41,6 @@ export const deliveries = pgTable("deliveries", {
   originPlace: text("origin_place").notNull(),
   destinationPlace: text("destination_place").notNull(),
   departureTime: timestamp("departure_time").notNull(),
-  travelTime: integer("travel_time").notNull(), // in minutes
   deliveryNotes: text("delivery_notes"),
   completedAt: timestamp("completed_at").defaultNow().notNull(),
 });

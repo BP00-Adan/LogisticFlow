@@ -21,7 +21,6 @@ const deliverySchema = z.object({
   originPlace: z.string().min(1, "El lugar de salida es requerido"),
   destinationPlace: z.string().min(1, "El lugar de destino es requerido"),
   departureTime: z.string().min(1, "La fecha y hora de salida es requerida"),
-  travelTime: z.coerce.number().min(1, "El tiempo de traslado debe ser mayor a 0"),
   deliveryNotes: z.string().optional(),
 });
 
@@ -40,7 +39,6 @@ export default function Event3() {
       originPlace: "",
       destinationPlace: "",
       departureTime: "",
-      travelTime: 0,
       deliveryNotes: "",
     },
   });
@@ -240,24 +238,6 @@ export default function Event3() {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="travelTime"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tiempo de Traslado (minutos)</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="number" 
-                                placeholder="45" 
-                                {...field}
-                                onChange={(e) => field.onChange(Number(e.target.value))}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
                     </div>
 
                     <FormField

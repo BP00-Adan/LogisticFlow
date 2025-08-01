@@ -198,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate reports (placeholder endpoints)
+  // Generate reports endpoints - Return PDF data for frontend to generate
   app.get("/api/processes/:id/reports/warehouse", async (req, res) => {
     try {
       const processId = parseInt(req.params.id);
@@ -208,12 +208,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Process not found" });
       }
 
-      // For now, return JSON data that could be used to generate PDF
-      res.json({
-        type: "warehouse_report",
-        process,
-        generatedAt: new Date(),
-      });
+      // Generate PDF content data
+      const pdfContent = {
+        title: "Reporte de Bodega",
+        processId: process.id,
+        processType: process.processType.toUpperCase(),
+        date: new Date().toLocaleDateString("es-ES"),
+        product: {
+          name: process.product.name,
+          weight: `${process.product.weight / 1000} kg`,
+          dimensions: `${process.product.dimensions.length}x${process.product.dimensions.width}x${process.product.dimensions.height} cm`,
+          regulations: Object.entries(process.product.regulations)
+            .filter(([_, value]) => value)
+            .map(([key]) => {
+              const labels = {
+                fragile: "Frágil",
+                lithium: "Batería Litio",
+                hazardous: "Peligroso", 
+                refrigerated: "Refrigerado",
+                valuable: "Valioso",
+                oversized: "Sobre-dimensionado"
+              };
+              return labels[key as keyof typeof labels];
+            })
+        },
+        transport: process.transport ? {
+          driver: process.transport.driverName,
+          license: process.transport.licenseNumber,
+          vehicle: `${process.transport.vehicleType} - ${process.transport.vehiclePlate}`,
+          notes: process.transport.notes || "Sin observaciones"
+        } : null,
+        delivery: process.delivery ? {
+          origin: process.delivery.originPlace,
+          destination: process.delivery.destinationPlace,
+          departureTime: new Date(process.delivery.departureTime).toLocaleString("es-ES"),
+          notes: process.delivery.deliveryNotes || "Sin observaciones"
+        } : null,
+        status: process.status,
+        events: process.currentEvent,
+        createdAt: new Date(process.createdAt).toLocaleString("es-ES")
+      };
+
+      res.json(pdfContent);
     } catch (error) {
       res.status(500).json({ error: "Failed to generate warehouse report" });
     }
@@ -228,11 +264,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Process not found" });
       }
 
-      res.json({
-        type: "transport_report",
-        process,
-        generatedAt: new Date(),
-      });
+      const pdfContent = {
+        title: "Reporte de Transporte",
+        processId: process.id,
+        processType: process.processType.toUpperCase(),
+        date: new Date().toLocaleDateString("es-ES"),
+        product: {
+          name: process.product.name,
+          weight: `${process.product.weight / 1000} kg`,
+          dimensions: `${process.product.dimensions.length}x${process.product.dimensions.width}x${process.product.dimensions.height} cm`
+        },
+        transport: process.transport ? {
+          driver: process.transport.driverName,
+          license: process.transport.licenseNumber,
+          vehicle: `${process.transport.vehicleType.toUpperCase()} - ${process.transport.vehiclePlate}`,
+          notes: process.transport.notes || "Sin observaciones especiales"
+        } : { error: "Información de transporte no disponible" },
+        route: process.delivery ? {
+          origin: process.delivery.originPlace,
+          destination: process.delivery.destinationPlace,
+          departureTime: new Date(process.delivery.departureTime).toLocaleString("es-ES")
+        } : { error: "Información de ruta no disponible" },
+        status: process.status,
+        createdAt: new Date(process.createdAt).toLocaleString("es-ES")
+      };
+
+      res.json(pdfContent);
     } catch (error) {
       res.status(500).json({ error: "Failed to generate transport report" });
     }
@@ -247,13 +304,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Process not found" });
       }
 
-      res.json({
-        type: "invoice",
-        process,
-        generatedAt: new Date(),
-      });
+      const pdfContent = {
+        title: "Factura de Servicios Logísticos",
+        processId: process.id,
+        processType: process.processType.toUpperCase(),
+        date: new Date().toLocaleDateString("es-ES"),
+        invoiceNumber: `INV-${process.id.toString().padStart(6, '0')}`,
+        product: {
+          name: process.product.name,
+          weight: `${process.product.weight / 1000} kg`,
+          dimensions: `${process.product.dimensions.length}x${process.product.dimensions.width}x${process.product.dimensions.height} cm`,
+          regulations: Object.entries(process.product.regulations)
+            .filter(([_, value]) => value)
+            .map(([key]) => {
+              const labels = {
+                fragile: "Manejo especial frágil",
+                lithium: "Transporte batería litio",
+                hazardous: "Material peligroso",
+                refrigerated: "Cadena de frío",
+                valuable: "Seguro adicional",
+                oversized: "Carga sobre-dimensionada"
+              };
+              return labels[key as keyof typeof labels];
+            })
+        },
+        services: [
+          { 
+            description: process.processType === "entrada" ? "Recepción en bodega" : "Preparación para envío",
+            quantity: 1,
+            unitPrice: 25000,
+            total: 25000
+          },
+          ...(process.transport ? [{
+            description: "Servicio de transporte",
+            quantity: 1, 
+            unitPrice: 35000,
+            total: 35000
+          }] : []),
+          ...(process.delivery ? [{
+            description: "Entrega a destino",
+            quantity: 1,
+            unitPrice: 15000,
+            total: 15000
+          }] : [])
+        ],
+        transport: process.transport,
+        delivery: process.delivery,
+        status: process.status,
+        createdAt: new Date(process.createdAt).toLocaleString("es-ES")
+      };
+
+      // Calculate totals
+      const subtotal = pdfContent.services.reduce((sum, service) => sum + service.total, 0);
+      const iva = Math.round(subtotal * 0.19);
+      const total = subtotal + iva;
+
+      (pdfContent as any).totals = {
+        subtotal,
+        iva,
+        total
+      };
+
+      res.json(pdfContent);
     } catch (error) {
-      res.status(500).json({ error: "Failed to generate invoice" });
+      res.status(500).json({ error: "Failed to generate invoice report" });
     }
   });
 
