@@ -155,23 +155,98 @@ export default function Event4() {
       
       // Add invoice details if it's an invoice report
       if (reportData.services) {
+        // Invoice specific information
         doc.setFont("helvetica", "bold");
-        doc.text("SERVICIOS:", 20, yPos);
+        doc.text(`FACTURA #${reportData.invoiceNumber}`, 20, yPos);
+        yPos += 10;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Fecha de emisión: ${reportData.date}`, 20, yPos);
+        yPos += 15;
+        
+        // Client information (based on delivery destination)
+        doc.setFont("helvetica", "bold");
+        doc.text("CLIENTE:", 20, yPos);
+        yPos += 10;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Destino: ${reportData.delivery?.destinationPlace || 'N/A'}`, 25, yPos);
+        yPos += 8;
+        doc.text(`Origen: ${reportData.delivery?.originPlace || 'N/A'}`, 25, yPos);
+        yPos += 15;
+        
+        // Transport details for invoice
+        if (reportData.transport) {
+          doc.setFont("helvetica", "bold");
+          doc.text("TRANSPORTE REALIZADO:", 20, yPos);
+          yPos += 10;
+          doc.setFont("helvetica", "normal");
+          doc.text(`Conductor: ${reportData.transport.driverName}`, 25, yPos);
+          yPos += 8;
+          doc.text(`Vehículo: ${reportData.transport.vehicleType.toUpperCase()} - ${reportData.transport.vehiclePlate}`, 25, yPos);
+          yPos += 8;
+          doc.text(`Licencia: ${reportData.transport.licenseNumber}`, 25, yPos);
+          yPos += 15;
+        }
+        
+        // Special handling based on product regulations
+        if (reportData.product.regulations && reportData.product.regulations.length > 0) {
+          doc.setFont("helvetica", "bold");
+          doc.text("SERVICIOS ESPECIALES:", 20, yPos);
+          yPos += 10;
+          doc.setFont("helvetica", "normal");
+          reportData.product.regulations.forEach((regulation: string) => {
+            doc.text(`• ${regulation}`, 25, yPos);
+            yPos += 8;
+          });
+          yPos += 7;
+        }
+        
+        // Services breakdown
+        doc.setFont("helvetica", "bold");
+        doc.text("DETALLE DE SERVICIOS:", 20, yPos);
         yPos += 10;
         doc.setFont("helvetica", "normal");
         
+        // Table header
+        doc.setFont("helvetica", "bold");
+        doc.text("Descripción", 25, yPos);
+        doc.text("Cant.", 110, yPos);
+        doc.text("Precio Unit.", 140, yPos);
+        doc.text("Total", 175, yPos);
+        yPos += 8;
+        
+        // Draw line
+        doc.line(25, yPos, 190, yPos);
+        yPos += 5;
+        
+        doc.setFont("helvetica", "normal");
         reportData.services.forEach((service: any) => {
-          doc.text(`${service.description}: $${service.total.toLocaleString()}`, 25, yPos);
+          doc.text(service.description, 25, yPos);
+          doc.text(service.quantity.toString(), 110, yPos);
+          doc.text(`$${service.unitPrice.toLocaleString()}`, 140, yPos);
+          doc.text(`$${service.total.toLocaleString()}`, 175, yPos);
           yPos += 8;
         });
         
         yPos += 10;
+        
+        // Totals section
         doc.setFont("helvetica", "bold");
-        doc.text(`SUBTOTAL: $${reportData.totals.subtotal.toLocaleString()}`, 25, yPos);
+        doc.text(`SUBTOTAL: $${reportData.totals.subtotal.toLocaleString()}`, 140, yPos);
         yPos += 8;
-        doc.text(`IVA (19%): $${reportData.totals.iva.toLocaleString()}`, 25, yPos);
+        doc.text(`IVA (19%): $${reportData.totals.iva.toLocaleString()}`, 140, yPos);
         yPos += 8;
-        doc.text(`TOTAL: $${reportData.totals.total.toLocaleString()}`, 25, yPos);
+        
+        // Total box
+        doc.rect(138, yPos - 2, 52, 12);
+        doc.text(`TOTAL: $${reportData.totals.total.toLocaleString()}`, 140, yPos + 5);
+        yPos += 15;
+        
+        // Payment terms
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text("Términos de pago: 30 días", 20, yPos);
+        yPos += 5;
+        doc.text("Proceso completado satisfactoriamente", 20, yPos);
       }
       
       // Add footer
