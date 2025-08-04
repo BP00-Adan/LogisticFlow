@@ -257,10 +257,12 @@ export default function Event4() {
         doc.text(`Estado del proceso: ${reportData.status === 'completed' ? 'COMPLETADO EXITOSAMENTE' : 'EN PROCESO'}`, 20, yPos);
       }
       
-      // Add footer
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "italic");
-      doc.text(`Generado el ${new Date().toLocaleString("es-ES")}`, 20, 280);
+      // Solo agregar footer con fecha generación para reportes que NO sean facturas
+      if (!reportData.services) {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.text(`Generado el ${new Date().toLocaleString("es-ES")}`, 20, 280);
+      }
       
       // Save the PDF
       doc.save(`${reportType}-proceso-${processId}.pdf`);
