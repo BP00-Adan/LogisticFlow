@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiFlow - Sistema de Gestión Logística</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#E3F2FD',
+                            100: '#BBDEFB',
+                            500: '#1976D2',
+                            600: '#1565C0',
+                            700: '#0D47A1',
+                        },
+                        secondary: {
+                            50: '#E8F5E8',
+                            100: '#C8E6C9',
+                            500: '#388E3C',
+                            600: '#2E7D32',
+                            700: '#1B5E20',
+                        },
+                        warning: {
+                            500: '#F57C00',
+                            600: '#EF6C00',
+                        },
+                        error: {
+                            500: '#D32F2F',
+                            600: '#C62828',
+                        }
+                    },
+                    boxShadow: {
+                        'material': '0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1)',
+                        'material-lg': '0 4px 8px rgba(0,0,0,0.12), 0 16px 32px rgba(0,0,0,0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        .step-completed { @apply bg-secondary-500 text-white; }
+        .step-active { @apply bg-primary-500 text-white; }
+        .step-pending { @apply bg-gray-200 text-gray-500; }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen">
+    <!-- @COMPONENT: AppHeader -->
+    <header class="bg-white shadow-material sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <!-- Company Logo Upload Area -->
+                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-primary-200 transition-all" data-implementation="Logo upload functionality">
+                        <i class="fas fa-upload text-primary-500"></i>
+                        <!-- @FUNCTIONALITY: File upload for company logo -->
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">LogiFlow</h1>
+                        <p class="text-sm text-gray-500">Sistema de Gestión Logística</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="btn-primary" data-event="click:showReports">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Reportes
+                    </button>
+                    <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white">
+                        <i class="fas fa-user text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: AppHeader -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- @COMPONENT: Dashboard -->
+        <div id="dashboard" class="space-y-8">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white rounded-xl shadow-material p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Productos Registrados</p>
+                            <p class="text-2xl font-bold text-gray-900" data-bind="stats.totalProducts">24</p>
+                        </div>
+                        <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-boxes text-primary-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-material p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">En Transporte</p>
+                            <p class="text-2xl font-bold text-warning-500" data-bind="stats.inTransit">8</p>
+                        </div>
+                        <div class="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-truck text-warning-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-material p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Entregados</p>
+                            <p class="text-2xl font-bold text-secondary-500" data-bind="stats.delivered">16</p>
+                        </div>
+                        <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-check-circle text-secondary-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-material p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Procesos Activos</p>
+                            <p class="text-2xl font-bold text-primary-500" data-bind="stats.activeProcesses">3</p>
+                        </div>
+                        <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-cogs text-primary-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Flow Navigator -->
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-6">Iniciar Nuevo Proceso</h2>
+                
+                <!-- Flow Type Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary-500 hover:bg-primary-50 transition-all cursor-pointer" data-event="click:startIncomingFlow">
+                        <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-arrow-down text-secondary-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Entrada a Bodega</h3>
+                        <p class="text-gray-500">Registrar productos que ingresan al almacén</p>
+                        <p class="text-sm text-gray-400 mt-2">Eventos: 1 → 2</p>
+                    </div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary-500 hover:bg-primary-50 transition-all cursor-pointer" data-event="click:startOutgoingFlow">
+                        <div class="w-16 h-16 bg-warning-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-arrow-up text-warning-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Salida de Bodega</h3>
+                        <p class="text-gray-500">Gestionar envío y entrega de productos</p>
+                        <p class="text-sm text-gray-400 mt-2">Eventos: 1 → 2 → 3 → 4</p>
+                    </div>
+                </div>
+
+                <!-- Process Steps Visualization -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Flujo del Proceso</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Registro de Productos</p>
+                                    <p class="text-xs text-gray-500">Información básica del producto</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-8 h-px bg-gray-300"></div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Información de Transporte</p>
+                                    <p class="text-xs text-gray-500">Datos del conductor y vehículo</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-8 h-px bg-gray-300"></div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Entrega del Producto</p>
+                                    <p class="text-xs text-gray-500">Registro de entrega</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-8 h-px bg-gray-300"></div>
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Reportes y Cierre</p>
+                                    <p class="text-xs text-gray-500">Generación de documentos</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Processes -->
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Procesos Activos</h2>
+                    <button class="text-primary-500 hover:text-primary-600 text-sm font-medium">Ver todos</button>
+                </div>
+                
+                <!-- @MAP: activeProcesses.map(process => ( -->
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-all" data-mock="true">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box text-warning-500"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900" data-bind="process.productName">Electrónicos Samsung</p>
+                                    <p class="text-sm text-gray-500" data-bind="process.id">Proceso #LP-2024-001</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-500">Evento Actual</p>
+                                    <p class="text-sm font-medium text-warning-500" data-bind="process.currentEvent">Transporte</p>
+                                </div>
+                                <button class="btn-primary-outline" data-event="click:resumeProcess" data-implementation="Resume process at current event">
+                                    Continuar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center space-x-2 text-xs text-gray-500">
+                                <span class="px-2 py-1 bg-secondary-100 text-secondary-700 rounded-full">Entrada</span>
+                                <span>•</span>
+                                <span data-bind="process.startDate">Iniciado: 15/01/2024 09:30</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-all" data-mock="true">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box text-primary-500"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900" data-bind="process.productName">Repuestos Automotrices</p>
+                                    <p class="text-sm text-gray-500" data-bind="process.id">Proceso #LP-2024-002</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-500">Evento Actual</p>
+                                    <p class="text-sm font-medium text-primary-500" data-bind="process.currentEvent">Entrega</p>
+                                </div>
+                                <button class="btn-primary-outline" data-event="click:resumeProcess">
+                                    Continuar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center space-x-2 text-xs text-gray-500">
+                                <span class="px-2 py-1 bg-warning-100 text-warning-700 rounded-full">Salida</span>
+                                <span>•</span>
+                                <span data-bind="process.startDate">Iniciado: 14/01/2024 14:15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+
+            <!-- Recent Records -->
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Registros Recientes</h2>
+                    <button class="text-primary-500 hover:text-primary-600 text-sm font-medium">Ver todos</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-3 px-4 font-medium text-gray-500 text-sm">Producto</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-500 text-sm">Tipo</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-500 text-sm">Estado</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-500 text-sm">Fecha</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-500 text-sm">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <!-- @MAP: recentRecords.map(record => ( -->
+                            <tr class="hover:bg-gray-50" data-mock="true">
+                                <td class="py-3 px-4" data-bind="record.productName">Electrónicos Samsung</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 bg-secondary-100 text-secondary-700 rounded-full text-xs" data-bind="record.type">Entrada</span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 bg-secondary-100 text-secondary-700 rounded-full text-xs" data-bind="record.status">Completado</span>
+                                </td>
+                                <td class="py-3 px-4 text-gray-500 text-sm" data-bind="record.date">15/01/2024</td>
+                                <td class="py-3 px-4">
+                                    <button class="text-primary-500 hover:text-primary-600 text-sm" data-event="click:viewDetails">Ver</button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50" data-mock="true">
+                                <td class="py-3 px-4" data-bind="record.productName">Repuestos Automotrices</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 bg-warning-100 text-warning-700 rounded-full text-xs" data-bind="record.type">Salida</span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 bg-warning-100 text-warning-700 rounded-full text-xs" data-bind="record.status">En tránsito</span>
+                                </td>
+                                <td class="py-3 px-4 text-gray-500 text-sm" data-bind="record.date">14/01/2024</td>
+                                <td class="py-3 px-4">
+                                    <button class="text-primary-500 hover:text-primary-600 text-sm" data-event="click:viewDetails">Ver</button>
+                                </td>
+                            </tr>
+                            <!-- @END_MAP )) -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Dashboard -->
+
+        <!-- @COMPONENT: ProductRegistration (Event 1) -->
+        <div id="event1" class="hidden space-y-8">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-xl shadow-material p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Evento 1: Registro de Productos</h2>
+                    <button class="text-gray-400 hover:text-gray-600" data-event="click:backToDashboard">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="step-active w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                    <div class="w-16 h-px bg-gray-300"></div>
+                    <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <div class="w-16 h-px bg-gray-300"></div>
+                    <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <div class="w-16 h-px bg-gray-300"></div>
+                    <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                </div>
+            </div>
+
+            <!-- Product Registration Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-material p-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Información del Producto</h3>
+                        
+                        <form class="space-y-6" data-implementation="Product registration form with validation">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Producto</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Ej: Electrónicos Samsung Galaxy" data-bind="product.name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Flujo</label>
+                                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" data-bind="product.flowType">
+                                        <option value="">Seleccionar</option>
+                                        <option value="entrada">Entrada a Bodega</option>
+                                        <option value="salida">Salida de Bodega</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Largo (cm)</label>
+                                    <input type="number" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="50" data-bind="product.dimensions.length">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Ancho (cm)</label>
+                                    <input type="number" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="30" data-bind="product.dimensions.width">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Alto (cm)</label>
+                                    <input type="number" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="20" data-bind="product.dimensions.height">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Peso (kg)</label>
+                                <input type="number" step="0.1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="5.5" data-bind="product.weight">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-4">Regulaciones Especiales</label>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-500 border-gray-300 rounded focus:ring-primary-500" data-bind="product.regulations.fragile">
+                                        <span class="text-sm text-gray-700">Frágil</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-500 border-gray-300 rounded focus:ring-primary-500" data-bind="product.regulations.lithium">
+                                        <span class="text-sm text-gray-700">Contiene Litio</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-500 border-gray-300 rounded focus:ring-primary-500" data-bind="product.regulations.hazardous">
+                                        <span class="text-sm text-gray-700">Material Peligroso</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-500 border-gray-300 rounded focus:ring-primary-500" data-bind="product.regulations.refrigerated">
+                                        <span class="text-sm text-gray-700">Refrigerado</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-500 border-gray-300 rounded focus:ring-primary-500" data-bind="product.regulations.valuable">
+                                        <span class="text-sm text-gray-700">Alto Valor</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                        <input type="checkbox" class="w-5 h-5 text-primary-500 border-gray-300 rounded focus:ring-primary-500" data-bind="product.regulations.oversized">
+                                        <span class="text-sm text-gray-700">Sobredimensionado</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end space-x-4 pt-6">
+                                <button type="button" class="btn-secondary" data-event="click:saveAsDraft">Guardar Borrador</button>
+                                <button type="submit" class="btn-primary" data-event="click:continueToEvent2" data-implementation="Validate form and proceed to Event 2">
+                                    Continuar a Evento 2
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Product Summary -->
+                <div>
+                    <div class="bg-white rounded-xl shadow-material p-6 sticky top-24">
+                        <h4 class="font-semibold text-gray-900 mb-4">Resumen del Producto</h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Nombre:</span>
+                                <span class="font-medium" data-bind="summary.name">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Dimensiones:</span>
+                                <span class="font-medium" data-bind="summary.dimensions">- x - x -</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Peso:</span>
+                                <span class="font-medium" data-bind="summary.weight">- kg</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Flujo:</span>
+                                <span class="font-medium" data-bind="summary.flowType">-</span>
+                            </div>
+                            <div class="pt-3 border-t border-gray-200">
+                                <span class="text-gray-500">Regulaciones:</span>
+                                <div class="mt-2 space-y-1" data-bind="summary.regulations">
+                                    <div class="text-xs text-gray-400">Ninguna seleccionada</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ProductRegistration -->
+
+        <!-- @COMPONENT: TransportInformation (Event 2) -->
+        <div id="event2" class="hidden space-y-8">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-xl shadow-material p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Evento 2: Información de Transporte</h2>
+                    <button class="text-gray-400 hover:text-gray-600" data-event="click:backToDashboard">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="step-completed w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="w-16 h-px bg-secondary-500"></div>
+                    <div class="step-active w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <div class="w-16 h-px bg-gray-300"></div>
+                    <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <div class="w-16 h-px bg-gray-300"></div>
+                    <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                </div>
+            </div>
+
+            <!-- Transport Information Form -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-material p-8">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Datos del Transporte</h3>
+                        
+                        <form class="space-y-6" data-implementation="Transport information form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Transportista</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Juan Carlos Rodríguez" data-bind="transport.driverName">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Número de Licencia</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="12345678" data-bind="transport.licenseNumber">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Vehículo</label>
+                                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" data-bind="transport.vehicleType">
+                                        <option value="">Seleccionar</option>
+                                        <option value="camion">Camión</option>
+                                        <option value="van">Van</option>
+                                        <option value="furgon">Furgón</option>
+                                        <option value="trailer">Tráiler</option>
+                                        <option value="moto">Motocicleta</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Placa del Vehículo</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="ABC-123" data-bind="transport.vehiclePlate">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Foto del Conductor</label>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-500 transition-all">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-camera text-gray-400 text-xl"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mb-2">Subir foto del conductor</p>
+                                    <button type="button" class="btn-primary-outline" data-implementation="File upload for driver photo">
+                                        Seleccionar Archivo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Notas Opcionales</label>
+                                <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Información adicional sobre el transporte..." data-bind="transport.notes"></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-4 pt-6">
+                                <button type="button" class="btn-secondary" data-event="click:pauseProcess">Pausar Proceso</button>
+                                <button type="button" class="btn-secondary" data-event="click:backToEvent1">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Anterior
+                                </button>
+                                <button type="submit" class="btn-primary" data-event="click:continueToEvent3" data-implementation="Validate transport form and proceed">
+                                    Continuar a Evento 3
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Transport Summary -->
+                <div>
+                    <div class="bg-white rounded-xl shadow-material p-6 sticky top-24">
+                        <h4 class="font-semibold text-gray-900 mb-4">Resumen del Transporte</h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Conductor:</span>
+                                <span class="font-medium" data-bind="transportSummary.driverName">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Licencia:</span>
+                                <span class="font-medium" data-bind="transportSummary.licenseNumber">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Vehículo:</span>
+                                <span class="font-medium" data-bind="transportSummary.vehicleType">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Placa:</span>
+                                <span class="font-medium" data-bind="transportSummary.vehiclePlate">-</span>
+                            </div>
+                            <div class="pt-3 border-t border-gray-200">
+                                <span class="text-gray-500">Estado:</span>
+                                <div class="mt-2">
+                                    <span class="px-2 py-1 bg-warning-100 text-warning-700 rounded-full text-xs">Pendiente</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: TransportInformation -->
+
+        <!-- @COMPONENT: DeliveryTracking (Event 3) -->
+        <div id="event3" class="hidden space-y-8">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-xl shadow-material p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Evento 3: Entrega del Producto</h2>
+                    <button class="text-gray-400 hover:text-gray-600" data-event="click:backToDashboard">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="step-completed w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="w-16 h-px bg-secondary-500"></div>
+                    <div class="step-completed w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="w-16 h-px bg-secondary-500"></div>
+                    <div class="step-active w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <div class="w-16 h-px bg-gray-300"></div>
+                    <div class="step-pending w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                </div>
+            </div>
+
+            <!-- Delivery Status -->
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Estado del Envío</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-warning-500 rounded-full animate-pulse"></div>
+                        <span class="text-warning-600 font-medium" data-bind="delivery.status">En Transporte</span>
+                    </div>
+                </div>
+
+                <!-- Product and Transport Info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-4">Información del Producto</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Producto:</span>
+                                <span data-bind="delivery.productName">Electrónicos Samsung</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Peso:</span>
+                                <span data-bind="delivery.weight">5.5 kg</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Dimensiones:</span>
+                                <span data-bind="delivery.dimensions">50x30x20 cm</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-4">Información del Transporte</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Conductor:</span>
+                                <span data-bind="delivery.driverName">Juan Carlos Rodríguez</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Vehículo:</span>
+                                <span data-bind="delivery.vehicleInfo">Camión - ABC-123</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Inicio de Transporte:</span>
+                                <span data-bind="delivery.startTime">15/01/2024 10:30</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Action -->
+                <div class="border-t border-gray-200 pt-8">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h4 class="font-medium text-gray-900 mb-4">Registro de Entrega</h4>
+                        <form class="space-y-6" data-implementation="Delivery completion form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Lugar de Salida</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Bodega Central" data-bind="delivery.originPlace">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Lugar de Destino</label>
+                                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Cliente Final" data-bind="delivery.destinationPlace">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Fecha y Hora de Salida</label>
+                                    <input type="datetime-local" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" data-bind="delivery.departureTime">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo de Traslado (minutos)</label>
+                                    <input type="number" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="45" data-bind="delivery.travelTime">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Notas de Entrega</label>
+                                <textarea rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" placeholder="Detalles adicionales sobre la entrega..." data-bind="delivery.deliveryNotes"></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-4">
+                                <button type="button" class="btn-secondary" data-event="click:backToEvent2">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Anterior
+                                </button>
+                                <button type="submit" class="btn-success" data-event="click:markAsDelivered" data-implementation="Mark delivery as completed and proceed to Event 4">
+                                    <i class="fas fa-check mr-2"></i>
+                                    Marcar como Entregado
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: DeliveryTracking -->
+
+        <!-- @COMPONENT: ReportsAndClosure (Event 4) -->
+        <div id="event4" class="hidden space-y-8">
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-xl shadow-material p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Evento 4: Reportes y Cierre</h2>
+                    <button class="text-gray-400 hover:text-gray-600" data-event="click:backToDashboard">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="step-completed w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="w-16 h-px bg-secondary-500"></div>
+                    <div class="step-completed w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="w-16 h-px bg-secondary-500"></div>
+                    <div class="step-completed w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="w-16 h-px bg-secondary-500"></div>
+                    <div class="step-active w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                </div>
+            </div>
+
+            <!-- Process Summary -->
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Resumen del Proceso</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-secondary-500 rounded-full"></div>
+                        <span class="text-secondary-600 font-medium">Proceso Completado</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-4">Producto</h4>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="text-gray-500">Nombre:</span> <span data-bind="summary.productName">Electrónicos Samsung</span></div>
+                            <div><span class="text-gray-500">Peso:</span> <span data-bind="summary.weight">5.5 kg</span></div>
+                            <div><span class="text-gray-500">Dimensiones:</span> <span data-bind="summary.dimensions">50x30x20 cm</span></div>
+                            <div><span class="text-gray-500">Tipo:</span> <span data-bind="summary.flowType">Salida de Bodega</span></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-4">Transporte</h4>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="text-gray-500">Conductor:</span> <span data-bind="summary.driverName">Juan Carlos Rodríguez</span></div>
+                            <div><span class="text-gray-500">Vehículo:</span> <span data-bind="summary.vehicleInfo">Camión - ABC-123</span></div>
+                            <div><span class="text-gray-500">Licencia:</span> <span data-bind="summary.licenseNumber">12345678</span></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900 mb-4">Entrega</h4>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="text-gray-500">Origen:</span> <span data-bind="summary.originPlace">Bodega Central</span></div>
+                            <div><span class="text-gray-500">Destino:</span> <span data-bind="summary.destinationPlace">Cliente Final</span></div>
+                            <div><span class="text-gray-500">Tiempo Traslado:</span> <span data-bind="summary.travelTime">45 minutos</span></div>
+                            <div><span class="text-gray-500">Completado:</span> <span data-bind="summary.completionDate">15/01/2024 15:30</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Generation -->
+            <div class="bg-white rounded-xl shadow-material p-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Generar Reportes</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="border border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-all">
+                        <div class="w-16 h-16 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-file-alt text-primary-500 text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-900 mb-2">Reporte de Bodega</h4>
+                        <p class="text-sm text-gray-500 mb-4">Documento de entrada/salida de productos</p>
+                        <button class="btn-primary-outline w-full" data-event="click:generateWarehouseReport" data-implementation="Generate warehouse PDF report">
+                            <i class="fas fa-download mr-2"></i>
+                            Descargar PDF
+                        </button>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-all">
+                        <div class="w-16 h-16 bg-warning-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-truck text-warning-500 text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-900 mb-2">Reporte de Transporte</h4>
+                        <p class="text-sm text-gray-500 mb-4">Información detallada del envío</p>
+                        <button class="btn-primary-outline w-full" data-event="click:generateTransportReport" data-implementation="Generate transport PDF report">
+                            <i class="fas fa-download mr-2"></i>
+                            Descargar PDF
+                        </button>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-all">
+                        <div class="w-16 h-16 bg-secondary-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-receipt text-secondary-500 text-xl"></i>
+                        </div>
+                        <h4 class="font-medium text-gray-900 mb-2">Factura</h4>
+                        <p class="text-sm text-gray-500 mb-4">Documento para el cliente receptor</p>
+                        <button class="btn-primary-outline w-full" data-event="click:generateInvoice" data-implementation="Generate invoice PDF">
+                            <i class="fas fa-download mr-2"></i>
+                            Descargar PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Process Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <button class="btn-secondary" data-event="click:saveToRecords" data-implementation="Save process to permanent records">
+                        Guardar en Registros
+                    </button>
+                    <button class="btn-primary" data-event="click:completeProcess" data-implementation="Mark process as complete and return to dashboard">
+                        Finalizar Proceso
+                        <i class="fas fa-check ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ReportsAndClosure -->
+    </div>
+
+    <script>
+        // TODO: Implement business logic, API calls, or state management
+        (function() {
+            'use strict';
+            
+            // Application state management
+            const appState = {
+                currentView: 'dashboard',
+                currentProcess: null,
+                processes: [],
+                products: []
+            };
+
+            // View management
+            function showView(viewId) {
+                // Hide all views
+                const views = ['dashboard', 'event1', 'event2', 'event3', 'event4'];
+                views.forEach(view => {
+                    const element = document.getElementById(view);
+                    if (element) {
+                        element.classList.add('hidden');
+                    }
+                });
+
+                // Show target view
+                const targetView = document.getElementById(viewId);
+                if (targetView) {
+                    targetView.classList.remove('hidden');
+                    appState.currentView = viewId;
+                }
+            }
+
+            // Event handlers for navigation
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('[data-event]');
+                if (!target) return;
+
+                const event = target.getAttribute('data-event');
+                e.preventDefault();
+
+                switch(event) {
+                    case 'click:startIncomingFlow':
+                        showView('event1');
+                        break;
+                    case 'click:startOutgoingFlow':
+                        showView('event1');
+                        break;
+                    case 'click:continueToEvent2':
+                        showView('event2');
+                        break;
+                    case 'click:continueToEvent3':
+                        showView('event3');
+                        break;
+                    case 'click:markAsDelivered':
+                        showView('event4');
+                        break;
+                    case 'click:backToDashboard':
+                    case 'click:completeProcess':
+                        showView('dashboard');
+                        break;
+                    case 'click:backToEvent1':
+                        showView('event1');
+                        break;
+                    case 'click:backToEvent2':
+                        showView('event2');
+                        break;
+                    case 'click:resumeProcess':
+                        // Logic to resume process at correct event
+                        showView('event2'); // Example
+                        break;
+                    case 'click:generateWarehouseReport':
+                    case 'click:generateTransportReport':
+                    case 'click:generateInvoice':
+                        // TODO: Implement PDF generation
+                        alert('Funcionalidad de generación de PDF en desarrollo');
+                        break;
+                    case 'click:pauseProcess':
+                        // TODO: Save current state and return to dashboard
+                        showView('dashboard');
+                        break;
+                    case 'click:saveAsDraft':
+                        // TODO: Save form data as draft
+                        alert('Borrador guardado');
+                        break;
+                }
+            });
+
+            // Form validation helpers
+            function validateForm(formElement) {
+                const requiredFields = formElement.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('border-error-500');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('border-error-500');
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Real-time form updates for summaries
+            document.addEventListener('input', function(e) {
+                if (e.target.matches('[data-bind]')) {
+                    // TODO: Update corresponding summary elements
+                    updateSummaryDisplay();
+                }
+            });
+
+            function updateSummaryDisplay() {
+                // TODO: Update summary panels with current form data
+            }
+
+            // Initialize application
+            function init() {
+                showView('dashboard');
+                // TODO: Load saved processes from storage
+                // TODO: Initialize form validation
+                // TODO: Set up auto-save functionality
+            }
+
+            // Start the application
+            init();
+        })();
+    </script>
+
+    <style>
+        .btn-primary {
+            @apply bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center;
+        }
+        .btn-primary-outline {
+            @apply border border-primary-500 text-primary-500 hover:bg-primary-50 px-6 py-3 rounded-lg font-medium transition-all flex items-center;
+        }
+        .btn-secondary {
+            @apply bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all;
+        }
+        .btn-success {
+            @apply bg-secondary-500 hover:bg-secondary-600 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center;
+        }
+    </style>
+</body>
+</html>
