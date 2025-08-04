@@ -123,11 +123,12 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <img 
                 src="/assets/logo.png" 
-                alt="Cargo Fast" 
+                alt="LogiFlow" 
                 className="h-10 w-auto"
               />
-              <div className="hidden sm:block">
-                <p className="text-xs text-gray-500">Sistema de Gestión Logística</p>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">LogiFlow</h1>
+                <p className="text-xs text-gray-500 hidden sm:block">Sistema de Gestión Logística</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
