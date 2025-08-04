@@ -13,7 +13,9 @@ import {
   AlertTriangle, 
   ArrowLeft,
   User,
-  Truck
+  Truck,
+  FileText,
+  Download
 } from "lucide-react";
 
 export default function Event3Entrada() {
@@ -287,6 +289,185 @@ export default function Event3Entrada() {
           </div>
         </CardContent>
       </Card>
+
+      {/* PDF Generation Section */}
+      <Card className="card-shadow">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <FileText className="h-5 w-5 text-blue-600" />
+            <span>Documentos Disponibles</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button
+              onClick={() => generatePDF('entry')}
+              variant="outline"
+              className="flex items-center space-x-2 h-12"
+            >
+              <Download className="h-4 w-4" />
+              <span>Reporte de Entrada a Bodega</span>
+            </Button>
+            
+            {process.transport && (
+              <Button
+                onClick={() => generatePDF('transport-invoice')}
+                variant="outline"
+                className="flex items-center space-x-2 h-12"
+              >
+                <Download className="h-4 w-4" />
+                <span>Factura de Transporte</span>
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
+
+  // PDF Generation function
+  const generatePDF = async (type: 'entry' | 'transport-invoice') => {
+    try {
+      const response = await fetch(`/api/processes/${processId}/reports/${type}`);
+      const data = await response.json();
+      
+      // Import jsPDF and generate PDF
+      const { jsPDF } = await import('jspdf');
+      
+      const doc = new jsPDF();
+      const logo = '/assets/logo.png';
+      
+      // Header with logo
+      doc.addImage(logo, 'PNG', 15, 15, 30, 15);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Cargo Fast', 50, 25);
+      
+      // Title
+      doc.setFontSize(16);
+      doc.text(data.title, 15, 45);
+      
+      // Content based on type
+      let yPos = 60;
+      
+      if (type === 'entry') {
+        // Entry report content
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        
+        doc.text(`Proceso #${data.processId}`, 15, yPos);
+        yPos += 10;
+        doc.text(`Fecha: ${data.date}`, 15, yPos);
+        yPos += 15;
+        
+        doc.setFont('helvetica', 'bold');
+        doc.text('Información del Producto:', 15, yPos);
+        yPos += 10;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Nombre: ${data.product.name}`, 20, yPos);
+        yPos += 7;
+        doc.text(`Peso: ${data.product.weight}`, 20, yPos);
+        yPos += 7;
+        doc.text(`Dimensiones: ${data.product.dimensions}`, 20, yPos);
+        yPos += 15;
+        
+        if (data.transport) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Información de Transporte:', 15, yPos);
+          yPos += 10;
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Conductor: ${data.transport.driver}`, 20, yPos);
+          yPos += 7;
+          doc.text(`Vehículo: ${data.transport.vehicle}`, 20, yPos);
+          yPos += 15;
+        }
+        
+        if (data.event3Status) {
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Estado: ${data.event3Status === 'confirmed' ? 'Confirmado' : 'Con Queja'}`, 15, yPos);
+          if (data.complaintNotes) {
+            yPos += 10;
+            doc.text('Notas de Queja:', 15, yPos);
+            yPos += 7;
+            doc.setFont('helvetica', 'normal');
+            const notes = doc.splitTextToSize(data.complaintNotes, 170);
+            doc.text(notes, 20, yPos);
+          }
+        }
+        
+      } else if (type === 'transport-invoice') {
+        // Transport invoice content
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        
+        doc.text(`Factura #${data.invoiceNumber}`, 15, yPos);
+        yPos += 7;
+        doc.text(`Fecha: ${data.date}`, 15, yPos);
+        yPos += 7;
+        doc.text(`Vencimiento: ${data.dueDate}`, 15, yPos);
+        yPos += 15;
+        
+        // Billing company
+        doc.setFont('helvetica', 'bold');
+        doc.text('Empresa de Transporte:', 15, yPos);
+        yPos += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.text(data.billingCompany.name, 20, yPos);
+        yPos += 5;
+        doc.text(`RUT: ${data.billingCompany.rut}`, 20, yPos);
+        yPos += 5;
+        doc.text(data.billingCompany.address, 20, yPos);
+        yPos += 15;
+        
+        // Service details
+        doc.setFont('helvetica', 'bold');
+        doc.text('Detalles del Servicio:', 15, yPos);
+        yPos += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Producto: ${data.serviceDetails.product}`, 20, yPos);
+        yPos += 5;
+        doc.text(`Peso: ${data.serviceDetails.weight}`, 20, yPos);
+        yPos += 5;
+        doc.text(`Conductor: ${data.serviceDetails.driver}`, 20, yPos);
+        yPos += 5;
+        doc.text(`Vehículo: ${data.serviceDetails.vehicle}`, 20, yPos);
+        yPos += 15;
+        
+        // Billing
+        doc.setFont('helvetica', 'bold');
+        doc.text('Facturación:', 15, yPos);
+        yPos += 7;
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Subtotal: $${data.billing.subtotal.toLocaleString()}`, 20, yPos);
+        yPos += 5;
+        doc.text(`IVA (19%): $${data.billing.tax.toLocaleString()}`, 20, yPos);
+        yPos += 5;
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Total: $${data.billing.total.toLocaleString()}`, 20, yPos);
+      }
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('LogisticsFlow - Sistema de Gestión Logística', 15, 280);
+      doc.text(`Generado el ${new Date().toLocaleString('es-ES')}`, 15, 285);
+      
+      // Save PDF
+      const fileName = type === 'entry' ? `entrada-${processId}.pdf` : `factura-transporte-${processId}.pdf`;
+      doc.save(fileName);
+      
+      toast({
+        title: "PDF Generado",
+        description: `El documento ${fileName} se ha descargado correctamente.`,
+      });
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo generar el PDF. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    }
+  };
 }

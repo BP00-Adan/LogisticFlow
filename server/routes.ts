@@ -281,6 +281,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate entry report (for entrada processes)
+  app.get("/api/processes/:id/reports/entry", async (req, res) => {
+    try {
+      const processId = parseInt(req.params.id);
+      const process = await storage.getProcessWithDetails(processId);
+      
+      if (!process) {
+        return res.status(404).json({ error: "Process not found" });
+      }
+
+      if (process.processType !== "entrada") {
+        return res.status(400).json({ error: "This report is only for entry processes" });
+      }
+
+      const pdfContent = {
+        title: "Reporte de Entrada a Bodega",
+        processId: process.id,
+        processType: "ENTRADA",
+        date: new Date().toLocaleDateString("es-ES"),
+        product: {
+          name: process.product.name,
+          weight: `${process.product.weight / 1000} kg`,
+          dimensions: `${process.product.dimensions.length}x${process.product.dimensions.width}x${process.product.dimensions.height} cm`,
+          regulations: Object.entries(process.product.regulations)
+            .filter(([_, value]) => value)
+            .map(([key]) => {
+              const labels = {
+                fragile: "Frágil",
+                lithium: "Batería Litio",
+                hazardous: "Peligroso", 
+                refrigerated: "Refrigerado",
+                valuable: "Valioso",
+                oversized: "Sobre-dimensionado"
+              };
+              return labels[key as keyof typeof labels];
+            })
+        },
+        transport: process.transport ? {
+          driver: process.transport.driverName,
+          license: process.transport.licenseNumber,
+          vehicle: `${process.transport.vehicleType} - ${process.transport.vehiclePlate}`,
+          notes: process.transport.notes || "Sin observaciones"
+        } : null,
+        status: process.status,
+        event3Status: process.event3Status,
+        complaintNotes: process.complaintNotes,
+        confirmedAt: process.confirmedAt ? new Date(process.confirmedAt).toLocaleString("es-ES") : null,
+        createdAt: new Date(process.createdAt).toLocaleString("es-ES")
+      };
+
+      res.json(pdfContent);
+      
+      // Auto-save PDF record to history
+      try {
+        await storage.createGeneratedPdf({
+          processId,
+          pdfType: "entrada_bodega",
+          fileName: `entrada-proceso-${processId}.pdf`,
+          filePath: null
+        });
+      } catch (error) {
+        console.log('Error saving PDF record:', error);
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate entry report" });
+    }
+  });
+
+  // Generate transport invoice (for external company billing us)
+  app.get("/api/processes/:id/reports/transport-invoice", async (req, res) => {
+    try {
+      const processId = parseInt(req.params.id);
+      const process = await storage.getProcessWithDetails(processId);
+      
+      if (!process || !process.transport) {
+        return res.status(404).json({ error: "Process or transport not found" });
+      }
+
+      // Calculate invoice amount based on weight and distance (mock calculation)
+      const baseRate = 50000; // Base rate in CLP
+      const weightRate = process.product.weight / 1000 * 5000; // 5000 CLP per kg
+      const invoiceAmount = baseRate + weightRate;
+
+      const pdfContent = {
+        title: "Factura de Transporte",
+        invoiceNumber: `FAC-${process.id.toString().padStart(6, '0')}`,
+        date: new Date().toLocaleDateString("es-ES"),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("es-ES"), // 30 days from now
+        
+        // External transport company (billing us)
+        billingCompany: {
+          name: "Transportes Rápidos Express S.A.",
+          rut: "76.543.210-K",
+          address: "Av. Logística 1234, Santiago",
+          phone: "+56 2 2345 6789",
+          email: "facturacion@transportesrapidos.cl"
+        },
+        
+        // Our company (being billed)
+        clientCompany: {
+          name: "Cargo Fast",
+          rut: "12.345.678-9",
+          address: "Av. Industrial 5678, Santiago",
+          phone: "+56 2 9876 5432",
+          email: "admin@cargofast.cl"
+        },
+        
+        serviceDetails: {
+          description: "Servicio de transporte de mercancías",
+          processId: process.id,
+          product: process.product.name,
+          weight: `${process.product.weight / 1000} kg`,
+          driver: process.transport.driverName,
+          vehicle: `${process.transport.vehicleType} - ${process.transport.vehiclePlate}`,
+          serviceDate: new Date(process.createdAt).toLocaleDateString("es-ES")
+        },
+        
+        billing: {
+          subtotal: invoiceAmount,
+          tax: invoiceAmount * 0.19, // 19% IVA
+          total: invoiceAmount * 1.19
+        },
+        
+        notes: process.transport.notes || "Servicio de transporte completado satisfactoriamente"
+      };
+
+      res.json(pdfContent);
+      
+      // Auto-save PDF record to history
+      try {
+        await storage.createGeneratedPdf({
+          processId,
+          pdfType: "factura_transporte",
+          fileName: `factura-transporte-${processId}.pdf`,
+          filePath: null
+        });
+      } catch (error) {
+        console.log('Error saving PDF record:', error);
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate transport invoice" });
+    }
+  });
+
   app.get("/api/processes/:id/reports/transport", async (req, res) => {
     try {
       const processId = parseInt(req.params.id);
