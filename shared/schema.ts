@@ -67,7 +67,7 @@ export const processes = pgTable("processes", {
 export const generatedPdfs = pgTable("generated_pdfs", {
   id: serial("id").primaryKey(),
   processId: integer("process_id").references(() => processes.id).notNull(),
-  pdfType: text("pdf_type", { enum: ["salida_producto", "factura", "entrada_confirmacion"] }).notNull(),
+  pdfType: text("pdf_type", { enum: ["salida_producto", "factura", "entrada_confirmacion", "entrada_bodega", "factura_transporte"] }).notNull(),
   fileName: text("file_name").notNull(),
   filePath: text("file_path"), // para storage en el futuro
   generatedAt: timestamp("generated_at").defaultNow().notNull(),

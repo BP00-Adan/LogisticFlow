@@ -337,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         await storage.createGeneratedPdf({
           processId,
-          pdfType: "entrada_bodega",
+          pdfType: "entrada_confirmacion",
           fileName: `entrada-proceso-${processId}.pdf`,
           filePath: null
         });
@@ -413,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         await storage.createGeneratedPdf({
           processId,
-          pdfType: "factura_transporte",
+          pdfType: "factura",
           fileName: `factura-transporte-${processId}.pdf`,
           filePath: null
         });
