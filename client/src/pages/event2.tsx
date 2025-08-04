@@ -288,12 +288,14 @@ export default function Event2() {
                       )}
                     />
 
-                    <div className="flex justify-end space-x-4 pt-6">
+                    <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-6">
                       <Button 
                         type="button" 
                         variant="outline"
                         onClick={handlePause}
                         disabled={pauseProcessMutation.isPending}
+                        className="w-full sm:w-auto"
+                        data-testid="button-pause-process"
                       >
                         <Pause className="h-4 w-4 mr-2" />
                         Pausar Proceso
@@ -302,14 +304,17 @@ export default function Event2() {
                         type="button" 
                         variant="outline"
                         onClick={() => setLocation("/event1")}
+                        className="w-full sm:w-auto"
+                        data-testid="button-previous"
                       >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Anterior
                       </Button>
                       <Button 
                         type="submit" 
-                        className="btn-logistics-primary"
+                        className="btn-logistics-primary w-full sm:w-auto"
                         disabled={updateProcessMutation.isPending}
+                        data-testid="button-continue"
                       >
                         {updateProcessMutation.isPending ? "Procesando..." : 
                          process.processType === "entrada" ? "Completar Proceso" : "Continuar a Evento 3"}

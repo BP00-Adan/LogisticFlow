@@ -5,7 +5,7 @@ import {
   type ProcessWithDetails
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 export interface IStorage {
   // Products
@@ -122,7 +122,7 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveProcesses(): Promise<Process[]> {
     return await db.select().from(processes).where(
-      eq(processes.status, 'in_progress')
+      or(eq(processes.status, 'in_progress'), eq(processes.status, 'paused'))
     );
   }
 
@@ -163,6 +163,37 @@ export class DatabaseStorage implements IStorage {
     .leftJoin(products, eq(processes.productId, products.id))
     .leftJoin(transports, eq(processes.transportId, transports.id))
     .leftJoin(deliveries, eq(processes.deliveryId, deliveries.id));
+
+    const processesWithDetails: ProcessWithDetails[] = [];
+    
+    for (const row of result) {
+      if (row.product) {
+        const pdfs = await this.getProcessPdfs(row.process.id);
+        processesWithDetails.push({
+          ...row.process,
+          product: row.product,
+          transport: row.transport || undefined,
+          delivery: row.delivery || undefined,
+          pdfs,
+        });
+      }
+    }
+    
+    return processesWithDetails;
+  }
+
+  async getActiveProcessesWithDetails(): Promise<ProcessWithDetails[]> {
+    const result = await db.select({
+      process: processes,
+      product: products,
+      transport: transports,
+      delivery: deliveries,
+    })
+    .from(processes)
+    .leftJoin(products, eq(processes.productId, products.id))
+    .leftJoin(transports, eq(processes.transportId, transports.id))
+    .leftJoin(deliveries, eq(processes.deliveryId, deliveries.id))
+    .where(or(eq(processes.status, 'in_progress'), eq(processes.status, 'paused')));
 
     const processesWithDetails: ProcessWithDetails[] = [];
     
