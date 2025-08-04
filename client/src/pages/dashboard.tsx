@@ -121,12 +121,13 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Upload className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">LogiFlow</h1>
-                <p className="text-xs text-gray-500 hidden sm:block">Sistema de Gestión Logística</p>
+              <img 
+                src="/assets/logo.png" 
+                alt="Cargo Fast" 
+                className="h-10 w-auto"
+              />
+              <div className="hidden sm:block">
+                <p className="text-xs text-gray-500">Sistema de Gestión Logística</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">

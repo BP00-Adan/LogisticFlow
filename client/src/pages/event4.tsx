@@ -69,7 +69,8 @@ export default function Event4() {
       // Add logo if available
       if (logoDataUrl) {
         try {
-          doc.addImage(logoDataUrl, 'PNG', 15, 15, 30, 15);
+          // Usar dimensiones mejoradas para el logo
+          doc.addImage(logoDataUrl, 'PNG', 15, 10, 40, 20);
         } catch (error) {
           console.log('Error adding logo to PDF:', error);
         }
@@ -78,7 +79,7 @@ export default function Event4() {
       // Add header
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text(reportData.title, logoDataUrl ? 55 : 20, 25);
+      doc.text(reportData.title, logoDataUrl ? 65 : 20, 25);
       
       // Add basic info
       doc.setFontSize(12);
