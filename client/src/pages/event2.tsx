@@ -59,7 +59,7 @@ export default function Event2() {
       
       // Navigate to appropriate event 3 based on flow type
       if (updatedProcess.processType === "entrada") {
-        setLocation(`/event3-entrada?processId=${processId}`);
+        setLocation(`/event3-entrada/${processId}`);
       } else {
         setLocation(`/event3/${processId}`);
       }

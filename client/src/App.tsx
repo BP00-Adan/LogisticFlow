@@ -19,7 +19,7 @@ function Router() {
       <Route path="/event1/:flowType" component={Event1} />
       <Route path="/event2/:processId" component={Event2} />
       <Route path="/event3/:processId" component={Event3} />
-      <Route path="/event3-entrada" component={Event3Entrada} />
+      <Route path="/event3-entrada/:processId" component={Event3Entrada} />
       <Route path="/event4/:processId" component={Event4} />
       <Route component={NotFound} />
     </Switch>

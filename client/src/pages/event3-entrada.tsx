@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import type { ProcessWithDetails } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +23,7 @@ export default function Event3Entrada() {
   const [selectedAction, setSelectedAction] = useState<"confirmed" | "complaint" | null>(null);
 
   // Get process ID from URL params
-  const processId = new URLSearchParams(window.location.search).get("processId");
+  const { processId } = useParams<{ processId: string }>();
 
   const { data: process, isLoading } = useQuery<ProcessWithDetails>({
     queryKey: ["/api/processes", processId],
@@ -32,7 +32,7 @@ export default function Event3Entrada() {
 
   const completeProcessMutation = useMutation({
     mutationFn: async (data: { action: "confirmed" | "complaint"; notes?: string }) => {
-      return apiRequest(`/api/processes/${processId}/complete-event3-entrada`, "POST", data);
+      return apiRequest("POST", `/api/processes/${processId}/complete-event3-entrada`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/processes"] });

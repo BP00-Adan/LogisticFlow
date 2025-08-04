@@ -60,7 +60,7 @@ export default function Dashboard() {
     } else if (nextEvent === 3) {
       // Direct to appropriate event 3 based on flow type
       if (process.processType === "entrada") {
-        setLocation(`/event3-entrada?processId=${process.id}`);
+        setLocation(`/event3-entrada/${process.id}`);
       } else {
         setLocation(`/event3/${process.id}`);
       }
