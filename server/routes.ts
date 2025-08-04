@@ -264,6 +264,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(pdfContent);
+      
+      // Auto-save PDF record to history
+      try {
+        await storage.createGeneratedPdf({
+          processId,
+          pdfType: "salida_producto",
+          fileName: `warehouse-proceso-${processId}.pdf`,
+          filePath: null
+        });
+      } catch (error) {
+        console.log('Error saving PDF record:', error);
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to generate warehouse report" });
     }
@@ -304,6 +316,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(pdfContent);
+      
+      // Auto-save PDF record to history
+      try {
+        await storage.createGeneratedPdf({
+          processId,
+          pdfType: "factura",
+          fileName: `transport-proceso-${processId}.pdf`,
+          filePath: null
+        });
+      } catch (error) {
+        console.log('Error saving PDF record:', error);
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to generate transport report" });
     }
@@ -380,6 +404,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(pdfContent);
+      
+      // Auto-save PDF record to history
+      try {
+        await storage.createGeneratedPdf({
+          processId,
+          pdfType: "factura",
+          fileName: `invoice-proceso-${processId}.pdf`,
+          filePath: null
+        });
+      } catch (error) {
+        console.log('Error saving PDF record:', error);
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to generate invoice report" });
     }
@@ -418,6 +454,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(processWithDetails);
     } catch (error) {
       res.status(500).json({ error: "Failed to complete event 3" });
+    }
+  });
+
+  // PDF History endpoints
+  app.post("/api/pdfs", async (req, res) => {
+    try {
+      const pdfData = req.body;
+      const pdf = await storage.createGeneratedPdf(pdfData);
+      res.json(pdf);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save PDF record" });
+    }
+  });
+
+  app.get("/api/pdfs/history", async (req, res) => {
+    try {
+      const processes = await storage.getAllProcessesWithDetails();
+      const processesWithPdfs = processes.filter(p => p.pdfs && p.pdfs.length > 0);
+      res.json(processesWithPdfs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch PDF history" });
     }
   });
 

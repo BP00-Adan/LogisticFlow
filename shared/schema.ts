@@ -63,6 +63,16 @@ export const processes = pgTable("processes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Nueva tabla para almacenar PDFs generados
+export const generatedPdfs = pgTable("generated_pdfs", {
+  id: serial("id").primaryKey(),
+  processId: integer("process_id").references(() => processes.id).notNull(),
+  pdfType: text("pdf_type", { enum: ["salida_producto", "factura", "entrada_confirmacion"] }).notNull(),
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path"), // para storage en el futuro
+  generatedAt: timestamp("generated_at").defaultNow().notNull(),
+});
+
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
@@ -86,6 +96,11 @@ export const insertProcessSchema = createInsertSchema(processes).omit({
   updatedAt: true,
 });
 
+export const insertGeneratedPdfSchema = createInsertSchema(generatedPdfs).omit({
+  id: true,
+  generatedAt: true,
+});
+
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
 
@@ -98,9 +113,13 @@ export type Delivery = typeof deliveries.$inferSelect;
 export type InsertProcess = z.infer<typeof insertProcessSchema>;
 export type Process = typeof processes.$inferSelect;
 
+export type InsertGeneratedPdf = z.infer<typeof insertGeneratedPdfSchema>;
+export type GeneratedPdf = typeof generatedPdfs.$inferSelect;
+
 // Extended types for API responses
 export type ProcessWithDetails = Process & {
   product: Product;
   transport?: Transport;
   delivery?: Delivery;
+  pdfs?: GeneratedPdf[];
 };

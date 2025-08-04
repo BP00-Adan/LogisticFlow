@@ -1,9 +1,11 @@
 import { 
-  products, transports, deliveries, processes,
-  type Product, type Transport, type Delivery, type Process,
-  type InsertProduct, type InsertTransport, type InsertDelivery, type InsertProcess,
+  products, transports, deliveries, processes, generatedPdfs,
+  type Product, type Transport, type Delivery, type Process, type GeneratedPdf,
+  type InsertProduct, type InsertTransport, type InsertDelivery, type InsertProcess, type InsertGeneratedPdf,
   type ProcessWithDetails
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Products
@@ -30,6 +32,10 @@ export interface IStorage {
   getProcessWithDetails(id: number): Promise<ProcessWithDetails | undefined>;
   getAllProcessesWithDetails(): Promise<ProcessWithDetails[]>;
 
+  // PDFs
+  createGeneratedPdf(pdf: InsertGeneratedPdf): Promise<GeneratedPdf>;
+  getProcessPdfs(processId: number): Promise<GeneratedPdf[]>;
+
   // Stats
   getStats(): Promise<{
     totalProducts: number;
@@ -39,25 +45,188 @@ export interface IStorage {
   }>;
 }
 
+
+
+export class DatabaseStorage implements IStorage {
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const [product] = await db.insert(products).values(insertProduct).returning();
+    return product;
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
+  }
+
+  async getAllProducts(): Promise<Product[]> {
+    return await db.select().from(products);
+  }
+
+  async createTransport(insertTransport: InsertTransport): Promise<Transport> {
+    const [transport] = await db.insert(transports).values(insertTransport).returning();
+    return transport;
+  }
+
+  async getTransport(id: number): Promise<Transport | undefined> {
+    const [transport] = await db.select().from(transports).where(eq(transports.id, id));
+    return transport || undefined;
+  }
+
+  async updateTransport(id: number, transport: Partial<InsertTransport>): Promise<Transport | undefined> {
+    const [updated] = await db.update(transports)
+      .set(transport)
+      .where(eq(transports.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async createDelivery(insertDelivery: InsertDelivery): Promise<Delivery> {
+    const [delivery] = await db.insert(deliveries).values(insertDelivery).returning();
+    return delivery;
+  }
+
+  async getDelivery(id: number): Promise<Delivery | undefined> {
+    const [delivery] = await db.select().from(deliveries).where(eq(deliveries.id, id));
+    return delivery || undefined;
+  }
+
+  async updateDelivery(id: number, delivery: Partial<InsertDelivery>): Promise<Delivery | undefined> {
+    const [updated] = await db.update(deliveries)
+      .set(delivery)
+      .where(eq(deliveries.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async createProcess(insertProcess: InsertProcess): Promise<Process> {
+    const [process] = await db.insert(processes).values(insertProcess).returning();
+    return process;
+  }
+
+  async getProcess(id: number): Promise<Process | undefined> {
+    const [process] = await db.select().from(processes).where(eq(processes.id, id));
+    return process || undefined;
+  }
+
+  async updateProcess(id: number, process: Partial<InsertProcess>): Promise<Process | undefined> {
+    const [updated] = await db.update(processes)
+      .set({ ...process, updatedAt: new Date() })
+      .where(eq(processes.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getAllProcesses(): Promise<Process[]> {
+    return await db.select().from(processes);
+  }
+
+  async getActiveProcesses(): Promise<Process[]> {
+    return await db.select().from(processes).where(
+      eq(processes.status, 'in_progress')
+    );
+  }
+
+  async getProcessWithDetails(id: number): Promise<ProcessWithDetails | undefined> {
+    const result = await db.select({
+      process: processes,
+      product: products,
+      transport: transports,
+      delivery: deliveries,
+    })
+    .from(processes)
+    .leftJoin(products, eq(processes.productId, products.id))
+    .leftJoin(transports, eq(processes.transportId, transports.id))
+    .leftJoin(deliveries, eq(processes.deliveryId, deliveries.id))
+    .where(eq(processes.id, id));
+
+    if (!result[0] || !result[0].product) return undefined;
+
+    const pdfs = await this.getProcessPdfs(id);
+
+    return {
+      ...result[0].process,
+      product: result[0].product,
+      transport: result[0].transport || undefined,
+      delivery: result[0].delivery || undefined,
+      pdfs,
+    };
+  }
+
+  async getAllProcessesWithDetails(): Promise<ProcessWithDetails[]> {
+    const result = await db.select({
+      process: processes,
+      product: products,
+      transport: transports,
+      delivery: deliveries,
+    })
+    .from(processes)
+    .leftJoin(products, eq(processes.productId, products.id))
+    .leftJoin(transports, eq(processes.transportId, transports.id))
+    .leftJoin(deliveries, eq(processes.deliveryId, deliveries.id));
+
+    const processesWithDetails: ProcessWithDetails[] = [];
+    
+    for (const row of result) {
+      if (row.product) {
+        const pdfs = await this.getProcessPdfs(row.process.id);
+        processesWithDetails.push({
+          ...row.process,
+          product: row.product,
+          transport: row.transport || undefined,
+          delivery: row.delivery || undefined,
+          pdfs,
+        });
+      }
+    }
+    
+    return processesWithDetails;
+  }
+
+  async createGeneratedPdf(insertPdf: InsertGeneratedPdf): Promise<GeneratedPdf> {
+    const [pdf] = await db.insert(generatedPdfs).values(insertPdf).returning();
+    return pdf;
+  }
+
+  async getProcessPdfs(processId: number): Promise<GeneratedPdf[]> {
+    return await db.select().from(generatedPdfs).where(eq(generatedPdfs.processId, processId));
+  }
+
+  async getStats() {
+    const allProcesses = await db.select().from(processes);
+    const totalProducts = await db.select().from(products);
+    
+    return {
+      totalProducts: totalProducts.length,
+      inTransit: allProcesses.filter(p => p.currentEvent === 3 && p.status === 'in_progress').length,
+      delivered: allProcesses.filter(p => p.status === 'completed').length,
+      activeProcesses: allProcesses.filter(p => p.status === 'in_progress' || p.status === 'paused').length,
+    };
+  }
+}
+
 export class MemStorage implements IStorage {
   private products: Map<number, Product>;
   private transports: Map<number, Transport>;
   private deliveries: Map<number, Delivery>;
   private processes: Map<number, Process>;
+  private pdfs: Map<number, GeneratedPdf>;
   private currentProductId: number;
   private currentTransportId: number;
   private currentDeliveryId: number;
   private currentProcessId: number;
+  private currentPdfId: number;
 
   constructor() {
     this.products = new Map();
     this.transports = new Map();
     this.deliveries = new Map();
     this.processes = new Map();
+    this.pdfs = new Map();
     this.currentProductId = 1;
     this.currentTransportId = 1;
     this.currentDeliveryId = 1;
     this.currentProcessId = 1;
+    this.currentPdfId = 1;
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
@@ -182,12 +351,14 @@ export class MemStorage implements IStorage {
 
     const transport = process.transportId ? this.transports.get(process.transportId) : undefined;
     const delivery = process.deliveryId ? this.deliveries.get(process.deliveryId) : undefined;
+    const pdfs = await this.getProcessPdfs(id);
 
     return {
       ...process,
       product,
       transport,
       delivery,
+      pdfs,
     };
   }
 
@@ -204,6 +375,22 @@ export class MemStorage implements IStorage {
     return processesWithDetails;
   }
 
+  async createGeneratedPdf(insertPdf: InsertGeneratedPdf): Promise<GeneratedPdf> {
+    const id = this.currentPdfId++;
+    const pdf: GeneratedPdf = {
+      ...insertPdf,
+      id,
+      filePath: insertPdf.filePath || null,
+      generatedAt: new Date(),
+    };
+    this.pdfs.set(id, pdf);
+    return pdf;
+  }
+
+  async getProcessPdfs(processId: number): Promise<GeneratedPdf[]> {
+    return Array.from(this.pdfs.values()).filter(pdf => pdf.processId === processId);
+  }
+
   async getStats() {
     const allProcesses = Array.from(this.processes.values());
     
@@ -216,4 +403,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

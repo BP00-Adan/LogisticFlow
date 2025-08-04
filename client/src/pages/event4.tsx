@@ -50,10 +50,35 @@ export default function Event4() {
       // Create new PDF document
       const doc = new jsPDF();
       
+      // Convertir logo a base64 para incluirlo en el PDF
+      let logoDataUrl = '';
+      try {
+        const logoResponse = await fetch('/assets/logo.png');
+        if (logoResponse.ok) {
+          const logoBlob = await logoResponse.blob();
+          logoDataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(logoBlob);
+          });
+        }
+      } catch (error) {
+        console.log('No se pudo cargar el logo:', error);
+      }
+      
+      // Add logo if available
+      if (logoDataUrl) {
+        try {
+          doc.addImage(logoDataUrl, 'PNG', 15, 15, 30, 15);
+        } catch (error) {
+          console.log('Error adding logo to PDF:', error);
+        }
+      }
+      
       // Add header
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.text(reportData.title, 20, 30);
+      doc.text(reportData.title, logoDataUrl ? 55 : 20, 25);
       
       // Add basic info
       doc.setFontSize(12);
@@ -69,40 +94,63 @@ export default function Event4() {
       doc.text("PRODUCTO:", 20, yPos);
       yPos += 10;
       doc.setFont("helvetica", "normal");
-      doc.text(`Nombre: ${reportData.product.name}`, 25, yPos);
+      doc.text(`Nombre: ${reportData.product.name || 'N/A'}`, 25, yPos);
       yPos += 8;
-      doc.text(`Peso: ${reportData.product.weight}`, 25, yPos);
+      doc.text(`Peso: ${reportData.product.weight || 'N/A'}`, 25, yPos);
       yPos += 8;
-      doc.text(`Dimensiones: ${reportData.product.dimensions}`, 25, yPos);
-      yPos += 15;
+      doc.text(`Dimensiones: ${reportData.product.dimensions || 'N/A'}`, 25, yPos);
+      yPos += 8;
       
-      // Add transport info if available
+      // Add special regulations
+      if (reportData.product.regulations && reportData.product.regulations.length > 0) {
+        doc.text(`Regulaciones especiales: ${reportData.product.regulations.join(', ')}`, 25, yPos);
+        yPos += 8;
+      }
+      yPos += 7;
+      
+      // Add transport info 
+      doc.setFont("helvetica", "bold");
+      doc.text("TRANSPORTE:", 20, yPos);
+      yPos += 10;
+      doc.setFont("helvetica", "normal");
       if (reportData.transport && !reportData.transport.error) {
-        doc.setFont("helvetica", "bold");
-        doc.text("TRANSPORTE:", 20, yPos);
-        yPos += 10;
-        doc.setFont("helvetica", "normal");
-        doc.text(`Conductor: ${reportData.transport.driver}`, 25, yPos);
+        doc.text(`Conductor: ${reportData.transport.driver || 'N/A'}`, 25, yPos);
         yPos += 8;
-        doc.text(`Licencia: ${reportData.transport.license}`, 25, yPos);
+        doc.text(`Licencia: ${reportData.transport.license || 'N/A'}`, 25, yPos);
         yPos += 8;
-        doc.text(`Vehículo: ${reportData.transport.vehicle}`, 25, yPos);
-        yPos += 15;
+        doc.text(`Vehículo: ${reportData.transport.vehicle || 'N/A'}`, 25, yPos);
+        yPos += 8;
+        if (reportData.transport.notes) {
+          doc.text(`Notas: ${reportData.transport.notes}`, 25, yPos);
+          yPos += 8;
+        }
+      } else {
+        doc.text('Información de transporte no disponible', 25, yPos);
+        yPos += 8;
       }
+      yPos += 7;
       
-      // Add delivery info if available
+      // Add delivery info 
+      doc.setFont("helvetica", "bold");
+      doc.text("ENTREGA:", 20, yPos);
+      yPos += 10;
+      doc.setFont("helvetica", "normal");
       if (reportData.delivery && !reportData.delivery.error) {
-        doc.setFont("helvetica", "bold");
-        doc.text("ENTREGA:", 20, yPos);
-        yPos += 10;
-        doc.setFont("helvetica", "normal");
-        doc.text(`Origen: ${reportData.delivery.origin}`, 25, yPos);
+        doc.text(`Origen: ${reportData.delivery.origin || 'N/A'}`, 25, yPos);
         yPos += 8;
-        doc.text(`Destino: ${reportData.delivery.destination}`, 25, yPos);
+        doc.text(`Destino: ${reportData.delivery.destination || 'N/A'}`, 25, yPos);
         yPos += 8;
-        doc.text(`Salida: ${reportData.delivery.departureTime}`, 25, yPos);
-        yPos += 15;
+        doc.text(`Salida: ${reportData.delivery.departureTime || 'N/A'}`, 25, yPos);
+        yPos += 8;
+        if (reportData.delivery.notes) {
+          doc.text(`Notas: ${reportData.delivery.notes}`, 25, yPos);
+          yPos += 8;
+        }
+      } else {
+        doc.text('Información de entrega no disponible', 25, yPos);
+        yPos += 8;
       }
+      yPos += 7;
       
       // Add invoice details if it's an invoice report
       if (reportData.services) {
@@ -132,6 +180,17 @@ export default function Event4() {
       
       // Save the PDF
       doc.save(`${reportType}-proceso-${processId}.pdf`);
+      
+      // Save PDF to history
+      try {
+        await apiRequest("POST", "/api/pdfs", {
+          processId: parseInt(processId!),
+          pdfType: reportType === 'warehouse' ? 'salida_producto' : 'factura',
+          fileName: `${reportType}-proceso-${processId}.pdf`
+        });
+      } catch (error) {
+        console.log('Error saving PDF to history:', error);
+      }
       
       toast({
         title: "Reporte descargado",

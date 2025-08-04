@@ -9,6 +9,7 @@ import Event2 from "@/pages/event2";
 import Event3 from "@/pages/event3";
 import Event3Entrada from "@/pages/event3-entrada";
 import Event4 from "@/pages/event4";
+import History from "@/pages/history";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/event3/:processId" component={Event3} />
       <Route path="/event3-entrada/:processId" component={Event3Entrada} />
       <Route path="/event4/:processId" component={Event4} />
+      <Route path="/history" component={History} />
       <Route component={NotFound} />
     </Switch>
   );

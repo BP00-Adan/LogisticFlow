@@ -10,7 +10,8 @@ import {
   ArrowDown,
   ArrowUp,
   Eye,
-  Play
+  Play,
+  History
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -129,6 +130,15 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => setLocation("/history")}
+                className="hidden sm:flex"
+              >
+                <History className="h-4 w-4" />
+                <span className="hidden md:inline ml-2">Historial</span>
+              </Button>
               <Button size="sm" className="hidden sm:flex bg-blue-600 hover:bg-blue-700">
                 <FileText className="h-4 w-4" />
                 <span className="hidden md:inline ml-2">Reportes</span>
