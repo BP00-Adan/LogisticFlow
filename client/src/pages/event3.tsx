@@ -45,11 +45,7 @@ export default function Event3() {
 
   const updateProcessMutation = useMutation({
     mutationFn: (data: DeliveryFormData) => {
-      const processedData = {
-        ...data,
-        departureTime: new Date(data.departureTime).toISOString(),
-      };
-      return apiRequest("POST", `/api/processes/${processId}/delivery`, processedData);
+      return apiRequest("POST", `/api/processes/${processId}/delivery`, data);
     },
     onSuccess: () => {
       toast({

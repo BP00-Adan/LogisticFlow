@@ -76,6 +76,8 @@ export const insertTransportSchema = createInsertSchema(transports).omit({
 export const insertDeliverySchema = createInsertSchema(deliveries).omit({
   id: true,
   completedAt: true,
+}).extend({
+  departureTime: z.string().transform((str) => new Date(str)),
 });
 
 export const insertProcessSchema = createInsertSchema(processes).omit({

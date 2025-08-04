@@ -105,7 +105,7 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
-  async createDelivery(insertDelivery: InsertDelivery): Promise<Delivery> {
+  async createDelivery(insertDelivery: any): Promise<Delivery> {
     const id = this.currentDeliveryId++;
     const delivery: Delivery = {
       ...insertDelivery,

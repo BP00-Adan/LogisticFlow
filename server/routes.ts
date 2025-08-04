@@ -112,7 +112,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/processes/:id/delivery", async (req, res) => {
     try {
       const processId = parseInt(req.params.id);
-      const deliveryData = insertDeliverySchema.parse(req.body);
+      
+      // Manual validation and transformation for delivery data
+      const { originPlace, destinationPlace, departureTime, deliveryNotes } = req.body;
+      
+      if (!originPlace || !destinationPlace || !departureTime) {
+        return res.status(400).json({ 
+          error: "Missing required fields", 
+          details: "originPlace, destinationPlace, and departureTime are required" 
+        });
+      }
+
+      const deliveryData = {
+        originPlace,
+        destinationPlace,
+        departureTime: new Date(departureTime),
+        deliveryNotes: deliveryNotes || null,
+      };
       
       // Create delivery
       const delivery = await storage.createDelivery(deliveryData);
@@ -130,10 +146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const processWithDetails = await storage.getProcessWithDetails(processId);
       res.json(processWithDetails);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: "Invalid delivery data", details: error.errors });
-      }
-      res.status(500).json({ error: "Failed to update process with delivery info" });
+      console.error("Delivery error:", error);
+      res.status(500).json({ error: "Failed to update process with delivery info", details: (error as Error).message });
     }
   });
 
