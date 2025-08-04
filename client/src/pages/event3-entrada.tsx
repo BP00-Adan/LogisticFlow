@@ -43,14 +43,14 @@ export default function Event3Entrada() {
           title: "Proceso Completado",
           description: "El producto fue confirmado como recibido correctamente.",
         });
-        setLocation("/dashboard");
+        setLocation("/");
       } else {
         toast({
           title: "Queja Registrada",
           description: "La queja fue registrada. El proceso queda abierto para seguimiento.",
           variant: "destructive",
         });
-        setLocation("/dashboard");
+        setLocation("/");
       }
     },
     onError: () => {
@@ -91,7 +91,7 @@ export default function Event3Entrada() {
           <CardContent className="p-8 text-center">
             <p className="text-gray-500">No se encontró el ID del proceso</p>
             <Button 
-              onClick={() => setLocation("/dashboard")} 
+              onClick={() => setLocation("/")} 
               className="mt-4"
             >
               Volver al Dashboard
@@ -121,7 +121,7 @@ export default function Event3Entrada() {
           <CardContent className="p-8 text-center">
             <p className="text-gray-500">No se encontró el proceso</p>
             <Button 
-              onClick={() => setLocation("/dashboard")} 
+              onClick={() => setLocation("/")} 
               className="mt-4"
             >
               Volver al Dashboard
@@ -139,7 +139,7 @@ export default function Event3Entrada() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
-            onClick={() => setLocation("/dashboard")}
+            onClick={() => setLocation("/")}
             className="text-blue-600 hover:text-blue-700"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
